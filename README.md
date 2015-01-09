@@ -1,4 +1,8 @@
 # Y
+[![Travis
+branch](https://img.shields.io/travis/emil2k/y.svg?style=flat)](https://travis-ci.org/emil2k/y)
+[![Coverage
+Status](https://img.shields.io/coveralls/emil2k/y.svg?style=flat)](https://coveralls.io/r/emil2k/y)
 
 **WARNING: This is a work in progress, if you want to help jump in.**
 
