@@ -16,6 +16,36 @@ go install github.com/emil2k/y -o vend
 
 ## Usage
 
+### `vend list`
+
+Lists all the dependencies of the package specified by the `[path]`, if ommitted
+defaults to the current working directory. The `[path]` can be specified
+relative to the current working directory or as an import path resolved through
+the `GOPATH`.
+
+```
+  vend list [arguments] [path]
+
+  -c=true: output child packages, stationed inside subdirectories
+  -q=false: outputs only import paths
+  -s=true: output standard library packages
+  -t=true: include test files
+  -v=false: outputs import details
+```
+
+### `vend info`
+
+Print out information regarding the package specified by the `[path]`, if
+ommitted defaults to the current working directory. The `[path]` can be
+specified relative to the current working directory or as an import path
+resolved through the `GOPATH`.
+
+```
+  vend info [arguments] [path]
+
+  -v=false: detailed output
+```
+
 ### `vend init [directory]`
 
 Recursively goes through the package in the current working directory and its
@@ -36,23 +66,6 @@ Example :
 
 ```
 vend init lib
-```
-
-### `vend list`
-
-Lists all the dependencies of the package specified by the `[path]`, if ommitted
-defaults to the current working directory. The `[path]` can be specified
-relative to the current working directory or as an import path resolved through
-the `GOPATH`.
-
-```
-  vend list [arguments] [directory]
-
-  -c=true: output child packages, stationed inside subdirectories
-  -q=false: outputs only import paths
-  -s=true: output standard library packages
-  -t=true: include test files
-  -v=false: outputs import details
 ```
 
 ### `vend mv [from] [to]`
@@ -78,7 +91,7 @@ in the current working directory.
 Example :
 
 ```
-vend mv image/png lib/mypng
+vend cp image/png lib/mypng
 ```
 
 ### `vend each [command]`

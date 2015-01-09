@@ -22,6 +22,16 @@ func main() {
 				path = "."
 			}
 			err = list(path)
+		case "info":
+			f := flagMap["info"]
+			f.Parse(os.Args[2:])
+			var path string
+			if len(f.Args()) > 0 {
+				path = f.Arg(0)
+			} else {
+				path = "."
+			}
+			err = info(path)
 		case "-h":
 			flagMap["main"].Usage()
 		default:

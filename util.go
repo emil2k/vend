@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/mgutz/ansi"
 )
@@ -16,13 +17,30 @@ var boldColorCode = ansi.ColorCode("cyan+b")
 var endColorCode = ansi.ColorCode("reset")
 
 // printErr prints out an error in color to the terminal.
-func printErr(err string) {
-	fmt.Println(errColorCode + err + endColorCode)
+func printErr(err ...string) {
+	fmt.Println(errColorCode + strings.Join(err, " ") + endColorCode)
 }
 
 // printBold prints out text in bold to the terminal.
-func printBold(b string) {
-	fmt.Println(boldColorCode + b + endColorCode)
+func printBold(b ...string) {
+	fmt.Println(boldColorCode + strings.Join(b, " ") + endColorCode)
+}
+
+// printWrap prints out the text with a newline each n characters, does not
+// split up words.
+func printWrap(n int, str ...string) {
+	var out int
+	for _, v := range str {
+		for _, w := range strings.Split(v, " ") {
+			if out+len(w) > n {
+				out = 0
+				fmt.Println()
+			}
+			fmt.Printf("%s ", w)
+			out += len(w)
+		}
+	}
+	fmt.Println()
 }
 
 // hasString checks if the slice has the particular string.

@@ -16,8 +16,9 @@ A Swiss Army knife for vending your own Go packages.
 
 Valid subcommands :
 
-  vend init
   vend list
+  vend info
+  vend init
   vend mv
 
 For help with subcommands run :
@@ -32,10 +33,20 @@ defaults to the current working directory. The [path] can be specified
 relative to the current working directory or as an import path resolved through
 the GOPATH.
 
-  vend list [arguments] [directory]
+  vend list [arguments] [path]
 `
 
-// usage returns a Usage functions that simply print the passed string, and the
+// infoUsage describes usage of the info subcommand.
+const infoUsage string = `
+Print out information about the package specified by the [path], if ommitted
+defaults to the current working directory. The [path] can be specified relative
+to the current working directory or as an import path resolved through the
+GOPATH.
+
+  vend info [arguments] [path]
+`
+
+// usage returns a Usage function that simply prints the passed string, and the
 // default usage.
 func usage(fs *flag.FlagSet, use string) func() {
 	return func() {
@@ -63,6 +74,7 @@ var opt optHolder = optHolder{}
 
 // init initialiazes flags for each subcommand.
 func init() {
+	// Main flagset
 	main := flag.NewFlagSet("main", flag.ExitOnError)
 	main.Usage = usage(main, mainUsage)
 	flagMap["main"] = main
@@ -78,4 +90,9 @@ func init() {
 	list.BoolVar(&opt.child, "c", true,
 		"output child packages, stationed inside subdirectories")
 	flagMap["list"] = list
+	// Info flagset
+	info := flag.NewFlagSet("info", flag.ExitOnError)
+	info.Usage = usage(info, infoUsage)
+	info.BoolVar(&opt.verbose, "v", false, "detailed output")
+	flagMap["info"] = info
 }

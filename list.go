@@ -5,6 +5,7 @@ import (
 	"go/build"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -33,19 +34,46 @@ func list(path string) error {
 	if err != nil {
 		return err
 	}
-	if opt.verbose {
-		printBold("GOROOT : " + build.Default.GOROOT)
-		printBold("GOPATH : " + build.Default.GOPATH)
-		printBold("IMPORT PATH : " + pkg.ImportPath)
-		printBold("DIRECTORY : " + pkg.Dir)
-		printBold("OBJECT : " + pkg.PkgObj)
-	}
 	// List imports
 	imp := getImports(pkg, opt.tests)
 	fimp := filterImports(pkg.ImportPath, imp, opt.standard, opt.child)
 	for _, v := range fimp {
-		fmt.Println(v)
+		info(v)
 	}
+	return nil
+}
+
+// info runs the info subcommand, printing information about a given package.
+// Also used by the list command to output details about imports, the quite and
+// verbose flags determine the output.
+func info(path string) error {
+	if opt.quite {
+		fmt.Println(path)
+		return nil
+	}
+	pkg, err := getPackage(path)
+	if err != nil {
+		return err
+	}
+	// Default output
+	printBold(pkg.ImportPath)
+	// Print package doc with line breaks
+	if len(pkg.Doc) > 0 {
+		printWrap(72, pkg.Doc)
+	} else {
+		fmt.Println("No package documentation.")
+	}
+	// Verbose output
+	if opt.verbose {
+		fmt.Println()
+		fmt.Println("  Standard : ", pkg.Goroot)
+		fmt.Println("  Directory : ", pkg.Dir)
+		if len(pkg.AllTags) > 0 {
+			fmt.Println("  Tags : ",
+				strings.Join(pkg.AllTags, " "))
+		}
+	}
+	fmt.Println()
 	return nil
 }
 
@@ -85,7 +113,8 @@ func isStandardPackage(path string) bool {
 }
 
 // getImports compiles a list of all the imports by appending TestImports and
-// XTestImports to Imports as necessary. Returns a slice with unique elements.
+// XTestImports to Imports as necessary. Returns a sorted slice with unique
+// elements.
 func getImports(pkg *build.Package, includeTests bool) []string {
 	if !includeTests {
 		return pkg.Imports
@@ -101,6 +130,7 @@ func getImports(pkg *build.Package, includeTests bool) []string {
 			imp = append(imp, v)
 		}
 	}
+	sort.Strings(imp)
 	return imp
 }
 
