@@ -24,3 +24,13 @@ func printErr(err string) {
 func printBold(b string) {
 	fmt.Println(boldColorCode + b + endColorCode)
 }
+
+// hasString checks if the slice has the particular string.
+func hasString(hay []string, needle string) bool {
+	for _, v := range hay {
+		if v == needle {
+			return true
+		}
+	}
+	return false
+}
