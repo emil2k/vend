@@ -32,6 +32,16 @@ func main() {
 				path = "."
 			}
 			err = info(path)
+		case "cp":
+			f := flagMap["cp"]
+			f.Parse(os.Args[2:])
+			if len(f.Args()) > 1 {
+				err = cp(f.Arg(0), f.Arg(1))
+			} else {
+				printErr("Missing arguments")
+				f.Usage()
+				os.Exit(1)
+			}
 		case "-h":
 			flagMap["main"].Usage()
 		default:

@@ -50,22 +50,40 @@ resolved through the `GOPATH`.
 
 Recursively goes through the package in the current working directory and its
 dependencies and copies all external packages into the specified `[directory]`,
-while updating all the import paths and [qualified
-identifiers](https://golang.org/ref/spec#Qualified_identifiers). Qualified
-identifiers aren't modified if the package name is defined during import. The
-packages are copied into a subdirectory specified by the basename of the
-package.
+while updating all the import paths. The specified `[directory]` is created if
+necessary.
 
-For example, `github.com/lib/pq` would be copied to `[directory]/pq`. If there
-are any conflicts, such as two `pq` packages, the packages will be copied to
-subdirectories containing their full import paths, i.e.
+The packages are copied into a subdirectory specified by the basename of the
+package. For example, `github.com/lib/pq` would be copied to `[directory]/pq`.
+If there are any conflicts, such as two `pq` packages, the packages will be
+copied to subdirectories containing their full import paths, i.e.
 `[directory]/github.com/lib/pq`, and a warning will be printed. The user can
 then use `vend mv` to move the packages into unique subdirectories.
 
 Example :
 
 ```
-vend init lib
+vend init ./lib
+```
+
+### `vend cp`
+
+Copies the package in the `[from]` import path or directory to the `[to]`
+directory, updating all the necessary import paths and [qualified
+identifiers](https://golang.org/ref/spec#Qualified_identifiers) for the package
+in the current working directory. Qualified identifiers aren't modified if the
+package name is defined during import.
+
+```
+  vend cp [from] [to]
+
+  -v=false: detailed output
+```
+
+Example :
+
+```
+vend cp image/png ./lib/mypng
 ```
 
 ### `vend mv [from] [to]`
@@ -73,25 +91,14 @@ vend init lib
 Moves the package in the `[from]` path or directory to the `[to]` directory,
 updating all the necessary import paths and [qualified
 identifiers](https://golang.org/ref/spec#Qualified_identifiers) for the package
-in the current working directory.
+in the current working directory. Qualified identifiers aren't modified if the
+package name is defined during import. The `mv` subcommand cannot be used with
+standard packages, use `cp` instead.
 
 Example :
 
 ```
-vend mv lib/pq lib/postgresql
-```
-
-### `vend cp [from] [to]`
-
-Copies the package in the `[from]` import path or directory to the `[to]`
-directory, updating all the necessary import paths and [qualified
-identifiers](https://golang.org/ref/spec#Qualified_identifiers) for the package
-in the current working directory.
-
-Example :
-
-```
-vend cp image/png lib/mypng
+vend mv ./lib/pq ./lib/postgresql
 ```
 
 ### `vend each [command]`

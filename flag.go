@@ -8,44 +8,6 @@ import (
 // flagMap maps a subcommand to its configured FlagSet.
 var flagMap map[string]*flag.FlagSet = make(map[string]*flag.FlagSet)
 
-// mainUsage describes usage of the overall tool.
-const mainUsage string = `
-A Swiss Army knife for vending your own Go packages.
-
-  vend [subcommand] [arguments]
-
-Valid subcommands :
-
-  vend list
-  vend info
-  vend init
-  vend mv
-
-For help with subcommands run :
-
-  vend [subcommand] -h
-`
-
-// listUsage describes usage of the list subcommand.
-const listUsage string = `
-Lists all the dependencies of the package specified by the [path], if ommitted
-defaults to the current working directory. The [path] can be specified
-relative to the current working directory or as an import path resolved through
-the GOPATH.
-
-  vend list [arguments] [path]
-`
-
-// infoUsage describes usage of the info subcommand.
-const infoUsage string = `
-Print out information about the package specified by the [path], if ommitted
-defaults to the current working directory. The [path] can be specified relative
-to the current working directory or as an import path resolved through the
-GOPATH.
-
-  vend info [arguments] [path]
-`
-
 // usage returns a Usage function that simply prints the passed string, and the
 // default usage.
 func usage(fs *flag.FlagSet, use string) func() {
@@ -95,4 +57,9 @@ func init() {
 	info.Usage = usage(info, infoUsage)
 	info.BoolVar(&opt.verbose, "v", false, "detailed output")
 	flagMap["info"] = info
+	// Cp flagset
+	cp := flag.NewFlagSet("cp", flag.ExitOnError)
+	cp.Usage = usage(cp, cpUsage)
+	cp.BoolVar(&opt.verbose, "v", false, "detailed output")
+	flagMap["cp"] = cp
 }
