@@ -26,9 +26,7 @@ func TestCp(t *testing.T) {
 	dst := filepath.Join(parent, uuid.New())
 	if err := cp("image", dst); err != nil {
 		t.Errorf("error : %s\n", err.Error())
-	}
-	// Build and compare the src and dst packages.
-	if srcPkg, err := getPackage("image"); err != nil {
+	} else if srcPkg, err := getPackage("image"); err != nil {
 		t.Errorf("error during src import : %s\n", err.Error())
 	} else if dstPkg, err := build.ImportDir(dst, 0); err != nil {
 		t.Errorf("error during dst import : %s\n", err.Error())

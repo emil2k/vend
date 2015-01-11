@@ -116,19 +116,10 @@ func isStandardPackage(path string) bool {
 // XTestImports to Imports as necessary. Returns a sorted slice with unique
 // elements.
 func getImports(pkg *build.Package, includeTests bool) []string {
-	if !includeTests {
-		return pkg.Imports
-	}
 	imp := pkg.Imports
-	for _, v := range pkg.TestImports {
-		if !hasString(imp, v) {
-			imp = append(imp, v)
-		}
-	}
-	for _, v := range pkg.XTestImports {
-		if !hasString(imp, v) {
-			imp = append(imp, v)
-		}
+	if includeTests {
+		imp = appendUnique(imp, pkg.TestImports)
+		imp = appendUnique(imp, pkg.XTestImports)
 	}
 	sort.Strings(imp)
 	return imp
@@ -145,15 +136,12 @@ func getImports(pkg *build.Package, includeTests bool) []string {
 // Compiles all the files ignoring build flags and any other build contstraints.
 func getPackage(path string) (pkg *build.Package, err error) {
 	var stat os.FileInfo
-	if stat, err = os.Stat(path); err == nil && stat.IsDir() {
+	if abs, err := filepath.Abs(path); err == nil {
 		// Withouth the absolute path, does not set the ImportPath
 		// properly.
-		pkg, err = ctx.ImportDir(filepath.Join(cwd, path), 0)
-		if err != nil {
-			return
+		if stat, err = os.Stat(path); err == nil && stat.IsDir() {
+			return ctx.ImportDir(abs, 0)
 		}
-	} else if pkg, err = ctx.Import(path, cwd, 0); err != nil {
-		return
 	}
-	return
+	return ctx.Import(path, cwd, 0)
 }
