@@ -41,8 +41,8 @@ GOPATH.
 // cpUsage describes usage of the cp subcommand.
 const cpUsage string = `
 Copies the package in the [from] import path or directory to the [to]
-directory, updating all the necessary import paths and qualified identifiers
-for the package in the current working directory.
+directory, updating the necessary import paths for the package in the current
+working directory.
 
   vend cp [from] [to]
 `

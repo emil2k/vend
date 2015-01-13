@@ -3,30 +3,92 @@ package main
 import (
 	"errors"
 	"fmt"
+	"go/build"
 	"io"
 	"os"
 	"path/filepath"
 )
 
 // cp copies the package at the specified path to the specified destination
-// directory.
-// TODO update imports and update qualified identifiers.
+// directory. Update import paths for the copied package in the package
+// located in the current working directory. Imports paths for child packages,
+// packages located in subdirectories of the copied package, are also updated.
 // Returns errors if the source package cannot be found or built, or if an
 // absolute path cannot be determined either for the source or destination.
-func cp(path, dst string) error {
-	pkg, err := getPackage(path)
-	if err != nil {
-		return err
+func cp(ctx *build.Context, cwd, src, dst string) (err error) {
+	var srcImp, dstImp string
+	var srcPkg, dstPkg, cwdPkg *build.Package
+	// May fail because there is multiple packages in the folder but all
+	// that is necessary here is the directory and the import path.
+	// Can't use the build.MultiplePackageError, to detect the error because
+	// it was only added in 1.4, and we want 1.2+.
+	if srcPkg, err = getPackage(ctx, src); len(srcPkg.Dir) == 0 {
+		if err == nil {
+			return fmt.Errorf("package has no directory")
+		}
+		return
+	} else if srcImp = srcPkg.ImportPath; len(srcImp) == 0 {
+		if err == nil {
+			return fmt.Errorf("package has no import path")
+		}
+		return
+	} else if src, err = cwdAbs(cwd, srcPkg.Dir); err != nil {
+		return
+	} else if dst, err = cwdAbs(cwd, dst); err != nil {
+		return
+	} else if err = copyDir(src, dst); err != nil {
+		return
 	}
-	src, err := filepath.Abs(pkg.Dir)
-	if err != nil {
-		return err
+	// Determine import path of the new package, and update import paths in
+	// the current working directory.
+	// Update the import paths of the new package and its children.
+	if dstPkg, err = getPackage(ctx, dst); len(dstPkg.ImportPath) == 0 {
+		return
+	} else {
+		dstImp = dstPkg.ImportPath
 	}
-	dst, err = filepath.Abs(dst)
-	if err != nil {
-		return err
+	// Get a list of all imports for the package in the current working
+	// directory, to determine which child package also need to be updated.
+	if cwdPkg, err = getPackage(ctx, cwd); err != nil {
+		return
 	}
-	return copyDir(src, dst)
+	// Compile map of import paths to change.
+	rw := map[string]string{srcImp: dstImp}
+	// Get the children of the src package their import paths will be
+	// updated as well.
+	for _, a := range getImports(cwdPkg, true) {
+		if isChildPackage(srcImp, a) {
+			rw[a], err = changePathParent(srcImp, dstImp, a)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	// Update the import paths.
+	return update(cwd, rw)
+}
+
+// changePathParent allows changing of a child import path to a new directory
+// by specifiying a their parent packages import path before `a` and after `b`.
+func changePathParent(a, b, child string) (string, error) {
+	a = filepath.FromSlash(a)
+	b = filepath.FromSlash(b)
+	child = filepath.FromSlash(child)
+	rel, err := filepath.Rel(a, child)
+	if err != nil {
+		return "", err
+	}
+	return filepath.ToSlash(filepath.Join(b, rel)), nil
+}
+
+// cwdAbs returns the path as absolute relative to the base directory if it is
+// not absolute.
+func cwdAbs(base, path string) (string, error) {
+	path = filepath.Clean(path)
+	if filepath.IsAbs(path) {
+		return path, nil
+	}
+	return filepath.Join(base, path), nil
 }
 
 // copyDir recursively copies the src directory to the desination directory.

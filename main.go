@@ -1,6 +1,9 @@
 package main
 
-import "os"
+import (
+	"go/build"
+	"os"
+)
 
 // main parses arguments and flags and passes the arguments to the correct
 // handler function.
@@ -11,6 +14,13 @@ func main() {
 		flagMap["main"].Usage()
 		os.Exit(1)
 	} else {
+		var cwd string
+		if cwd, err = os.Getwd(); err != nil {
+			printErr("Error : " + err.Error())
+			os.Exit(1)
+		}
+		ctx := &build.Default
+		ctx.UseAllFiles = true
 		switch os.Args[1] {
 		case "list":
 			f := flagMap["list"]
@@ -21,7 +31,7 @@ func main() {
 			} else {
 				path = "."
 			}
-			err = list(path)
+			err = list(ctx, cwd, path)
 		case "info":
 			f := flagMap["info"]
 			f.Parse(os.Args[2:])
@@ -31,12 +41,12 @@ func main() {
 			} else {
 				path = "."
 			}
-			err = info(path)
+			err = info(ctx, cwd, path)
 		case "cp":
 			f := flagMap["cp"]
 			f.Parse(os.Args[2:])
 			if len(f.Args()) > 1 {
-				err = cp(f.Arg(0), f.Arg(1))
+				err = cp(ctx, cwd, f.Arg(0), f.Arg(1))
 			} else {
 				printErr("Missing arguments")
 				f.Usage()

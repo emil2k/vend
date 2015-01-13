@@ -9,36 +9,19 @@ import (
 	"strings"
 )
 
-// cwd is the current working directory.
-var cwd string
-
-// ctx is a build context based on build.Default but includes all files.
-var ctx build.Context
-
-// init sets the current working directory and initializes the build context.
-func init() {
-	var err error
-	if cwd, err = os.Getwd(); err != nil {
-		printErr("Error : " + err.Error())
-		os.Exit(1)
-	}
-	ctx = build.Default
-	ctx.UseAllFiles = true
-}
-
 // list runs the list subcommand, listing all the dependencies of the package
 // at the specified path, relative paths are resolved from the current working
 // directory.
-func list(path string) error {
-	pkg, err := getPackage(path)
+func list(ctx *build.Context, cwd, path string) error {
+	pkg, err := getPackage(ctx, path)
 	if err != nil {
 		return err
 	}
 	// List imports
 	imp := getImports(pkg, opt.tests)
-	fimp := filterImports(pkg.ImportPath, imp, opt.standard, opt.child)
+	fimp := filterImports(ctx, cwd, pkg.ImportPath, imp, opt.standard, opt.child)
 	for _, v := range fimp {
-		info(v)
+		info(ctx, cwd, v)
 	}
 	return nil
 }
@@ -46,12 +29,12 @@ func list(path string) error {
 // info runs the info subcommand, printing information about a given package.
 // Also used by the list command to output details about imports, the quite and
 // verbose flags determine the output.
-func info(path string) error {
+func info(ctx *build.Context, cwd, path string) error {
 	if opt.quite {
 		fmt.Println(path)
 		return nil
 	}
-	pkg, err := getPackage(path)
+	pkg, err := getPackage(ctx, path)
 	if err != nil {
 		return err
 	}
@@ -79,7 +62,8 @@ func info(path string) error {
 
 // filterImports filters the imports by either ommitting or including standard
 // and child packages, returns filtered slice of import paths.
-func filterImports(parent string, imp []string, std, child bool) []string {
+// TODO rewrite filtering this isn't a good way to do this.
+func filterImports(ctx *build.Context, cwd, parent string, imp []string, std, child bool) []string {
 	r := make([]string, 0, len(imp))
 	for _, v := range imp {
 		// Filter child packages
@@ -87,7 +71,7 @@ func filterImports(parent string, imp []string, std, child bool) []string {
 			continue
 		}
 		// Filter standard packages
-		if !std && isStandardPackage(v) {
+		if !std && isStandardPackage(ctx, cwd, v) {
 			continue
 		}
 		r = append(r, v)
@@ -98,13 +82,13 @@ func filterImports(parent string, imp []string, std, child bool) []string {
 // isChildPackage checks if the child package is stationed in a subdirectory of
 // the parent package. Pass in the import paths for both the parent and the
 // child.
-func isChildPackage(parent string, child string) bool {
+func isChildPackage(parent, child string) bool {
 	return strings.HasPrefix(child, parent)
 }
 
 // isStandardPackage checks if the package is located in the standard library.
 // If an error is thrown during import assumes it is not in the standard library.
-func isStandardPackage(path string) bool {
+func isStandardPackage(ctx *build.Context, cwd, path string) bool {
 	if pkg, err := ctx.Import(path, cwd, build.FindOnly); err != nil {
 		return false
 	} else {
@@ -134,7 +118,7 @@ func getImports(pkg *build.Package, includeTests bool) []string {
 // Returns an error if the resolved directory does not contain a buildable Go
 // package.
 // Compiles all the files ignoring build flags and any other build contstraints.
-func getPackage(path string) (pkg *build.Package, err error) {
+func getPackage(ctx *build.Context, path string) (pkg *build.Package, err error) {
 	var stat os.FileInfo
 	if abs, err := filepath.Abs(path); err == nil {
 		// Withouth the absolute path, does not set the ImportPath
@@ -143,5 +127,5 @@ func getPackage(path string) (pkg *build.Package, err error) {
 			return ctx.ImportDir(abs, 0)
 		}
 	}
-	return ctx.Import(path, cwd, 0)
+	return ctx.Import(path, "", 0)
 }

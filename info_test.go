@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go/build"
 	"reflect"
 	"testing"
 )
@@ -22,10 +23,10 @@ func TestIsChildPackage(t *testing.T) {
 // TestIsStandardPackage tests if the image package is a standard package using
 // the isStandardPackage function, and tests that this package is not.
 func TestIsStandardPackage(t *testing.T) {
-	if x := isStandardPackage("image"); !x {
+	if x := isStandardPackage(&build.Default, "", "image"); !x {
 		t.Error("expected true")
 	}
-	if x := isStandardPackage("github.com/emil2k/y"); x {
+	if x := isStandardPackage(&build.Default, "", "github.com/emil2k/y"); x {
 		t.Error("expected false")
 	}
 }
@@ -86,7 +87,7 @@ var filterImportsTests = []struct {
 func TestFilterImports(t *testing.T) {
 	for _, tt := range filterImportsTests {
 		pre := fmt.Sprintf("std? %t child? %t : ", tt.std, tt.child)
-		out := filterImports(tt.parent, tt.imp, tt.std, tt.child)
+		out := filterImports(&build.Default, "", tt.parent, tt.imp, tt.std, tt.child)
 		if !reflect.DeepEqual(out, tt.out) {
 			t.Errorf(pre+"got %s, expected %s\n", out, tt.out)
 		}

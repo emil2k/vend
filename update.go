@@ -5,6 +5,7 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
+	"log"
 	"os"
 
 	"golang.org/x/tools/astutil"
@@ -65,6 +66,10 @@ func rwImport(fs *token.FileSet, f *ast.File, op, np string) (err error) {
 		}()
 		if err = printer.Fprint(wf, fs, f); err != nil {
 			return err
+		}
+		// Output
+		if opt.verbose {
+			log.Printf("%s => %s : %s\n", op, np, tf.Name())
 		}
 	}
 	return nil
