@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"golang.org/x/tools/astutil"
+	"github.com/emil2k/y/lib/astutil"
 )
 
 // update goes through the package in the srcDir and updates import path as

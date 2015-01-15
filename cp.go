@@ -15,6 +15,8 @@ import (
 // packages located in subdirectories of the copied package, are also updated.
 // Returns errors if the source package cannot be found or built, or if an
 // absolute path cannot be determined either for the source or destination.
+// TODO Update imports inside the copied package itself, may have a test package
+// inside the directory.
 func cp(ctx *build.Context, cwd, src, dst string) (err error) {
 	var srcImp, dstImp string
 	var srcPkg, dstPkg, cwdPkg *build.Package

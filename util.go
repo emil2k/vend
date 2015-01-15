@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mgutz/ansi"
+	"github.com/emil2k/y/lib/ansi"
 )
 
 // errColorCode is placed to output an error in color to the terminal.
