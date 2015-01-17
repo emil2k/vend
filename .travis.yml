@@ -12,6 +12,6 @@ before_install:
   - go get github.com/mattn/goveralls
   - if ! go get code.google.com/p/go.tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
 script:
-  - go test -bench=. -benchmem -covermode=count -coverprofile=main.coverprofile github.com/emil2k/y
+  - go test -bench=. -benchmem -covermode=count -coverprofile=main.coverprofile github.com/emil2k/vend
   - $HOME/gopath/bin/gover
-  - $HOME/gopath/bin/goveralls -coverprofile=gover.coverprofile -service travis-ci -repotoken DwGmmLEK8DFDwwNMZy6WKomiCc6BBwIuc
+  - $HOME/gopath/bin/goveralls -coverprofile=gover.coverprofile -service travis-ci -repotoken wfxe6r11IJN7tlWzrJcrWu3qS5n7NES8i

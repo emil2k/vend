@@ -18,7 +18,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/emil2k/y/lib/astutil"
+	"github.com/emil2k/vend/lib/astutil"
 )
 
 // pathToString returns a string containing the concrete types of the

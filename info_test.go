@@ -10,11 +10,11 @@ import (
 // TestIsChildPackage tests the isChildPackage function with a posive and
 // negative case.
 func TestIsChildPackage(t *testing.T) {
-	x := isChildPackage("github.com/emil2k/y", "github.com/emil2k/y/x")
+	x := isChildPackage("github.com/emil2k/vend", "github.com/emil2k/vend/x")
 	if !x {
 		t.Error("expected true")
 	}
-	x = isChildPackage("github.com/emil2k/y/x", "github.com/emil2k/y")
+	x = isChildPackage("github.com/emil2k/vend/x", "github.com/emil2k/vend")
 	if x {
 		t.Error("expected false")
 	}
@@ -26,7 +26,7 @@ func TestIsStandardPackage(t *testing.T) {
 	if x := isStandardPackage(&build.Default, "", "image"); !x {
 		t.Error("expected true")
 	}
-	if x := isStandardPackage(&build.Default, "", "github.com/emil2k/y"); x {
+	if x := isStandardPackage(&build.Default, "", "github.com/emil2k/vend"); x {
 		t.Error("expected false")
 	}
 }
@@ -40,24 +40,24 @@ var filterImportsTests = []struct {
 	out    []string
 }{
 	{
-		"github.com/emil2k/y",
+		"github.com/emil2k/vend",
 		[]string{
 			"github.com/lib/pq",
-			"github.com/emil2k/y/x",
+			"github.com/emil2k/vend/x",
 			"image",
 		},
 		false,
 		true,
 		[]string{
 			"github.com/lib/pq",
-			"github.com/emil2k/y/x",
+			"github.com/emil2k/vend/x",
 		},
 	},
 	{
-		"github.com/emil2k/y",
+		"github.com/emil2k/vend",
 		[]string{
 			"github.com/lib/pq",
-			"github.com/emil2k/y/x",
+			"github.com/emil2k/vend/x",
 			"image",
 		},
 		true,
@@ -68,10 +68,10 @@ var filterImportsTests = []struct {
 		},
 	},
 	{
-		"github.com/emil2k/y",
+		"github.com/emil2k/vend",
 		[]string{
 			"github.com/lib/pq",
-			"github.com/emil2k/y/x",
+			"github.com/emil2k/vend/x",
 			"image",
 		},
 		false,

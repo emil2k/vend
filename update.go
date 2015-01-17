@@ -9,7 +9,7 @@ import (
 
 	"os"
 
-	"github.com/emil2k/y/lib/astutil"
+	"github.com/emil2k/vend/lib/astutil"
 )
 
 // update goes through the package in the srcDir and updates import path as

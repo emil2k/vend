@@ -1,8 +1,8 @@
-# Y
+# Vend
 [![Travis
-branch](https://img.shields.io/travis/emil2k/y.svg?style=flat)](https://travis-ci.org/emil2k/y)
+branch](https://img.shields.io/travis/emil2k/vend.svg?style=flat)](https://travis-ci.org/emil2k/vend)
 [![Coverage
-Status](https://img.shields.io/coveralls/emil2k/y.svg?style=flat)](https://coveralls.io/r/emil2k/y)
+Status](https://img.shields.io/coveralls/emil2k/vend.svg?style=flat)](https://coveralls.io/r/emil2k/vend)
 
 **WARNING: This is a work in progress, if you want to help jump in.**
 
@@ -11,8 +11,13 @@ A Swiss Army knife for vending your own Go packages.
 ## Installation
 
 ```
-go install github.com/emil2k/y -o vend
+go get github.com/emil2k/vend
 ```
+
+## Compatibility
+
+- Go 1.2+
+- Should work on OSX and Linux, someone should test it on Windows.
 
 ## Usage
 
@@ -84,32 +89,6 @@ Example :
 vend mv ./lib/pq ./lib/postgresql
 ```
 
-### `vend name [path] [name]`
-
-Changes the package name of the package specified by the `[path]` import path or
-directory to the `[name]`, updating all the [qualified
-identifiers](https://golang.org/ref/spec#Qualified_identifiers) for the package
-in the current working directory. Qualified identifiers aren't modified if the
-package name is defined during import. The `name` subcommand cannot be used with
-standard packages, you must first `cp` the package out of the `GOROOT`.
-
-Example :
-
-```
-vend name ./lib/mypq mypq
-```
-
-### `vend each [command]`
-
-Changes to the directory of each dependency, outside of the standard library,
-for the package in the current working directory and runs the `[command]`.
-
-Example :
-
-```
-vend each go test -v .
-```
-
 ### `vend list`
 
 Lists all the dependencies of the package specified by the `[path]`, if ommitted
@@ -138,4 +117,30 @@ resolved through the `GOPATH`.
   vend info [arguments] [path]
 
   -v=false: detailed output
+```
+
+### TODO: `vend name`
+
+Changes the package name of the package specified by the `[path]` import path or
+directory to the `[name]`, updating all the [qualified
+identifiers](https://golang.org/ref/spec#Qualified_identifiers) for the package
+in the current working directory. Qualified identifiers aren't modified if the
+package name is defined during import. The `name` subcommand cannot be used with
+standard packages, you must first `cp` the package out of the `GOROOT`.
+
+Example :
+
+```
+vend name ./lib/mypq mypq
+```
+
+### TODO: `vend each`
+
+Changes to the directory of each dependency, outside of the standard library,
+for the package in the current working directory and runs the `[command]`.
+
+Example :
+
+```
+vend each go test -v .
 ```
