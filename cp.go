@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // ErrDstExist is thrown when attempting to copy to a destination that already
@@ -119,6 +120,7 @@ func cwdAbs(base, path string) (string, error) {
 // mode.
 // With the opt.verbose option set outputs the src and destination of each
 // copied file.
+// Skips hidden files base on the opt.hidden option.
 func copyDir(src, dst string) error {
 	walk := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -127,6 +129,14 @@ func copyDir(src, dst string) error {
 		rel, err := filepath.Rel(src, path)
 		if err != nil {
 			return err
+		}
+		if rel != "." && rel != ".." &&
+			!opt.hidden && strings.HasPrefix(rel, ".") {
+			if info.IsDir() {
+				return filepath.SkipDir
+			} else {
+				return nil
+			}
 		}
 		fileDst := filepath.Join(dst, rel)
 		if opt.verbose {

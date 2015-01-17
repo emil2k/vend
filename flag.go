@@ -31,6 +31,9 @@ type optHolder struct {
 	child bool
 	// force flag forces the command to execute after a warning.
 	force bool
+	// hidden flag includes hidden files, starting with a dot, when copying
+	// or moving files.
+	hidden bool
 }
 
 // opt argumes passed into the command.
@@ -65,5 +68,7 @@ func init() {
 	cp.BoolVar(&opt.verbose, "v", false, "detailed output")
 	cp.BoolVar(&opt.force, "f", false,
 		"forces copy, replaces destination folder")
+	cp.BoolVar(&opt.hidden, "i", false,
+		"ignore hidden files, files starting with a dot")
 	flagMap["cp"] = cp
 }

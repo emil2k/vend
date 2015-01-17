@@ -45,6 +45,7 @@ working directory.
   vend cp [from] [to]
 
   -f=false: forces copy, replaces destination folder
+  -i=false: ignore hidden files, files starting with a dot
   -v=false: detailed output
 ```
 
@@ -69,8 +70,8 @@ vend mv ./lib/pq ./lib/postgresql
 
 ### `vend name [path] [name]`
 
-Changes the package name of the package specified by the [path] import path or
-directory to the [name], updating all the [qualified
+Changes the package name of the package specified by the `[path]` import path or
+directory to the `[name]`, updating all the [qualified
 identifiers](https://golang.org/ref/spec#Qualified_identifiers) for the package
 in the current working directory. Qualified identifiers aren't modified if the
 package name is defined during import. The `name` subcommand cannot be used with
