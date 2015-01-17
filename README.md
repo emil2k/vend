@@ -44,6 +44,7 @@ working directory.
 ```
   vend cp [from] [to]
 
+  -f=false: forces copy, replaces destination folder
   -v=false: detailed output
 ```
 

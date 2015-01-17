@@ -29,6 +29,8 @@ type optHolder struct {
 	standard bool
 	// child flag includes child packages.
 	child bool
+	// force flag forces the command to execute after a warning.
+	force bool
 }
 
 // opt argumes passed into the command.
@@ -61,5 +63,7 @@ func init() {
 	cp := flag.NewFlagSet("cp", flag.ExitOnError)
 	cp.Usage = usage(cp, cpUsage)
 	cp.BoolVar(&opt.verbose, "v", false, "detailed output")
+	cp.BoolVar(&opt.force, "f", false,
+		"forces copy, replaces destination folder")
 	flagMap["cp"] = cp
 }

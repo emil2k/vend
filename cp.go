@@ -9,6 +9,10 @@ import (
 	"path/filepath"
 )
 
+// ErrDstExist is thrown when attempting to copy to a destination that already
+// exists with out using the force flag.
+var ErrDstExists = errors.New("destination already exists")
+
 // cp copies the package at the specified path to the specified destination
 // directory. Update import paths for the copied package in the package
 // located in the current working directory. Imports paths for child packages,
@@ -18,6 +22,18 @@ import (
 // Updates imports inside the copied package itself, may have a test package
 // inside the directory that imports itself.
 func cp(ctx *build.Context, cwd, src, dst string) (err error) {
+	// Check if destination folder exists and based on force flag determine
+	// action.
+	if _, serr := os.Stat(dst); serr == nil {
+		if opt.force {
+			os.RemoveAll(dst)
+		} else {
+			return ErrDstExists
+		}
+	} else if !os.IsNotExist(serr) {
+		// Some other error with destination
+		return serr
+	}
 	var srcImp, dstImp string
 	var srcPkg, dstPkg, cwdPkg *build.Package
 	// May fail because there is multiple packages in the folder but all
