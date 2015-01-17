@@ -39,6 +39,22 @@ GOPATH.
   vend info [arguments] [path]
 `
 
+// initUsage describes usage of the init subcommand.
+const initUsage string = `
+For the package in the current working directory copies all external packages
+into the specified [directory], while updating all the import paths. External
+packages are packages that are not located in a subdirectory or a standard
+package. The specified [directory] is created if necessary.
+
+The packages are copied into a subdirectory specified by the package name. If
+multiple dependencies have the same package name the command will fail and
+provide all the duplicates, the user should use the vend cp command to place
+those packages in unique directories before running vend init again to process
+the other packages.
+
+  vend init [directory]
+`
+
 // cpUsage describes usage of the cp subcommand.
 const cpUsage string = `
 Copies the package in the [from] import path or directory to the [to]

@@ -71,6 +71,15 @@ func init() {
 	cp.BoolVar(&opt.hidden, "i", false,
 		"ignore hidden files, files starting with a dot")
 	flagMap["cp"] = cp
+	// Init flagset
+	init := flag.NewFlagSet("init", flag.ExitOnError)
+	init.Usage = usage(init, initUsage)
+	init.BoolVar(&opt.verbose, "v", false, "detailed output")
+	init.BoolVar(&opt.force, "f", false,
+		"forces copy, replaces destination folder")
+	init.BoolVar(&opt.hidden, "i", false,
+		"ignore hidden files, files starting with a dot")
+	flagMap["init"] = init
 	// Mv flagset
 	mv := flag.NewFlagSet("mv", flag.ExitOnError)
 	mv.Usage = usage(mv, mvUsage)

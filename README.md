@@ -16,18 +16,26 @@ go install github.com/emil2k/y -o vend
 
 ## Usage
 
-### `vend init [directory]`
+### `vend init`
 
-Recursively goes through the package in the current working directory and copies
-all external packages into the specified `[directory]`, while updating all the
-import paths. The specified `[directory]` is created if necessary.
+For the package in the current working directory copies all external packages
+into the specified `[directory]`, while updating all the import paths. External
+packages are packages that are not located in a subdirectory or a standard
+package. The specified `[directory]` is created if necessary.
 
-The packages are copied into a subdirectory specified by the package name. For
-example, `github.com/lib/pq` ( `package pq` ) would be copied to
-`[directory]/pq`. If there are any conflicts, such as two `pq` packages, the
-packages will be copied to subdirectories containing their full original import
-paths, i.e. `[directory]/github.com/lib/pq`, and a warning will be printed. The
-user can then use `vend mv` to move the packages into unique subdirectories.
+The packages are copied into a subdirectory specified by the package name. If
+multiple dependencies have the same package name the command will fail and
+provide all the duplicates, the user should use the `vend cp` command to place
+those packages in unique directories before running `vend init` again to process
+the other packages.
+
+```
+  vend init [directory]
+
+  -f=false: forces copy, replaces destination folder
+  -i=false: ignore hidden files, files starting with a dot
+  -v=false: detailed output
+```
 
 Example :
 

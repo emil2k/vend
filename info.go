@@ -18,9 +18,9 @@ func list(ctx *build.Context, cwd, path string) error {
 		return err
 	}
 	// List imports
-	imp := getImports(pkg, opt.tests)
-	fimp := filterImports(ctx, cwd, pkg.ImportPath, imp, opt.standard, opt.child)
-	for _, v := range fimp {
+	imp := filterImports(ctx, cwd, pkg.ImportPath,
+		getImports(pkg, opt.tests), opt.standard, opt.child)
+	for _, v := range imp {
 		info(ctx, cwd, v)
 	}
 	return nil

@@ -42,6 +42,16 @@ func main() {
 				path = "."
 			}
 			err = info(ctx, cwd, path)
+		case "init":
+			f := flagMap["init"]
+			f.Parse(os.Args[2:])
+			if len(f.Args()) > 0 {
+				err = initc(ctx, cwd, f.Arg(0))
+			} else {
+				printErr("Missing argument")
+				f.Usage()
+				os.Exit(1)
+			}
 		case "cp":
 			f := flagMap["cp"]
 			f.Parse(os.Args[2:])
