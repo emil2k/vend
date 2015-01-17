@@ -39,7 +39,7 @@ func info(ctx *build.Context, cwd, path string) error {
 		return err
 	}
 	// Default output
-	printBold(pkg.ImportPath)
+	printBold(fmt.Sprintf("%s (%s)", pkg.Name, pkg.ImportPath))
 	// Print package doc with line breaks
 	if len(pkg.Doc) > 0 {
 		printWrap(72, pkg.Doc)
@@ -48,15 +48,13 @@ func info(ctx *build.Context, cwd, path string) error {
 	}
 	// Verbose output
 	if opt.verbose {
-		fmt.Println()
-		fmt.Println("  Standard : ", pkg.Goroot)
-		fmt.Println("  Directory : ", pkg.Dir)
+		fmt.Println("  Standard :\t", pkg.Goroot)
+		fmt.Println("  Directory :\t", pkg.Dir)
 		if len(pkg.AllTags) > 0 {
-			fmt.Println("  Tags : ",
+			fmt.Println("  Tags :\t",
 				strings.Join(pkg.AllTags, " "))
 		}
 	}
-	fmt.Println()
 	return nil
 }
 
