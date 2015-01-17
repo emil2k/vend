@@ -8,10 +8,11 @@ A Swiss Army knife for vending your own Go packages.
 
 Valid subcommands :
 
-  vend list
-  vend info
   vend init
   vend cp
+  vend mv
+  vend list
+  vend info
 
 For help with subcommands run :
 
@@ -45,4 +46,14 @@ directory, updating the necessary import paths for the package in the current
 working directory.
 
   vend cp [from] [to]
+`
+
+// mvUsage describes usage of the mv subcommand.
+const mvUsage string = `
+Moves the package in the [from] path or directory to the [to] directory,
+updating the necessary import paths for the package in the current working
+directory. The mv subcommand cannot be used with standard packages, use
+cp instead.
+
+  vend mv [from] [to]
 `

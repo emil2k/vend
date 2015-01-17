@@ -55,12 +55,20 @@ Example :
 vend cp image/png ./lib/mypng
 ```
 
-### `vend mv [from] [to]`
+### `vend mv`
 
 Moves the package in the `[from]` path or directory to the `[to]` directory,
 updating the necessary import paths for the package in the current working
 directory. The `mv` subcommand cannot be used with standard packages, use
 `cp` instead.
+
+```
+  vend mv [from] [to]
+
+  -f=false: forces move, replaces destination folder
+  -i=false: ignore hidden files, files starting with a dot
+  -v=false: detailed output
+```
 
 Example :
 

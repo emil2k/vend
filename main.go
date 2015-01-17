@@ -52,6 +52,21 @@ func main() {
 				f.Usage()
 				os.Exit(1)
 			}
+		case "mv":
+			f := flagMap["mv"]
+			f.Parse(os.Args[2:])
+			if len(f.Args()) > 1 {
+				err = mv(ctx, cwd, f.Arg(0), f.Arg(1))
+				if err == ErrStandardPackage {
+					printErr("Cannot move standard package")
+					f.Usage()
+					os.Exit(1)
+				}
+			} else {
+				printErr("Missing arguments")
+				f.Usage()
+				os.Exit(1)
+			}
 		case "-h":
 			flagMap["main"].Usage()
 		default:

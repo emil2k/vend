@@ -92,6 +92,27 @@ func cp(ctx *build.Context, cwd, src, dst string) (err error) {
 	return update(cwd, rw)
 }
 
+// ErrStandardPackage is returned when a subcommand is attempted on a standard
+// package, but it prohibts execution on standard packages.
+var ErrStandardPackage = errors.New("standard package specified")
+
+// mv moves the package at the specified path to the specified destination
+// directory.
+// Just like cp, but cannot be used with standard packages and removes the
+// source directory afterwards.
+func mv(ctx *build.Context, cwd, src, dst string) (err error) {
+	srcPkg, err := getPackage(ctx, src)
+	if err != nil {
+		return err
+	} else if srcPkg.Goroot {
+		return ErrStandardPackage
+	}
+	if err := cp(ctx, cwd, src, dst); err != nil {
+		return err
+	}
+	return os.RemoveAll(src)
+}
+
 // changePathParent allows changing of a child import path to a new directory
 // by specifiying a their parent packages import path before `a` and after `b`.
 func changePathParent(a, b, child string) (string, error) {
