@@ -1,11 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/printer"
 	"go/token"
-	"log"
+
 	"os"
 
 	"github.com/emil2k/y/lib/astutil"
@@ -69,7 +70,8 @@ func rwImport(fs *token.FileSet, f *ast.File, op, np string) (err error) {
 		}
 		// Output
 		if opt.verbose {
-			log.Printf("%s => %s : %s\n", op, np, tf.Name())
+			printBold(fmt.Sprintf("%s => %s", op, np))
+			fmt.Println(tf.Name())
 		}
 	}
 	return nil
