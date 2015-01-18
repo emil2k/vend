@@ -21,6 +21,15 @@ go get github.com/emil2k/vend
 
 ## Usage
 
+This tool makes a couple of assumptions about a given package :
+
+- The dependencies are present, run `go get -u`.
+- Located in the proper location in the `GOPATH`.
+
+  If you are working on a fork, make sure the package is located in the
+directory in your `GOPATH` allocated for the original package. You can add your
+fork as a remote.
+
 ### `vend init`
 
 For the package in the current working directory copies all external packages
