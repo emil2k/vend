@@ -23,11 +23,11 @@ type optHolder struct {
 	quite bool
 	// verbose flag to increase output.
 	verbose bool
-	// tests flag includes the test packages.
+	// tests flag omits test files.
 	tests bool
-	// standard flag includes standard library packages.
+	// standard flag omits standard packages.
 	standard bool
-	// child flag includes child packages.
+	// child flag omits packages located in subdirectories.
 	child bool
 	// force flag forces the command to execute after a warning.
 	force bool
@@ -50,12 +50,12 @@ func init() {
 	list.Usage = usage(list, listUsage)
 	list.BoolVar(&opt.quite, "q", false, "outputs only import paths")
 	list.BoolVar(&opt.verbose, "v", false, "outputs details for each import")
-	list.BoolVar(&opt.tests, "t", true,
-		"include test files when compiling imports")
-	list.BoolVar(&opt.standard, "s", true,
-		"output standard library packages")
-	list.BoolVar(&opt.child, "c", true,
-		"output child packages, stationed inside subdirectories")
+	list.BoolVar(&opt.tests, "t", false,
+		"omit test files when compiling imports")
+	list.BoolVar(&opt.standard, "s", false,
+		"omit standard packages")
+	list.BoolVar(&opt.child, "c", false,
+		"omit child packages, located in subdirectories")
 	flagMap["list"] = list
 	// Info flagset
 	info := flag.NewFlagSet("info", flag.ExitOnError)

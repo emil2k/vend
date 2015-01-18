@@ -99,11 +99,11 @@ the `GOPATH`.
 ```
   vend list [arguments] [path]
 
-  -c=true: output child packages, stationed inside subdirectories
+  -c=false: omit child packages, located in subdirectories
   -q=false: outputs only import paths
-  -s=true: output standard library packages
-  -t=true: include test files
-  -v=false: outputs import details
+  -s=false: omit standard packages
+  -t=false: omit test files when compiling imports
+  -v=false: outputs details for each import
 ```
 
 ### `vend info`

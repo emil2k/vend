@@ -35,8 +35,8 @@ func TestIsStandardPackage(t *testing.T) {
 var filterImportsTests = []struct {
 	parent string
 	imp    []string
-	std    bool
-	child  bool
+	std    bool // whether to omit standard packages
+	child  bool // whether to omit child packages
 	out    []string
 }{
 	{
@@ -46,8 +46,8 @@ var filterImportsTests = []struct {
 			"github.com/emil2k/vend/x",
 			"image",
 		},
-		false,
 		true,
+		false,
 		[]string{
 			"github.com/lib/pq",
 			"github.com/emil2k/vend/x",
@@ -60,8 +60,8 @@ var filterImportsTests = []struct {
 			"github.com/emil2k/vend/x",
 			"image",
 		},
-		true,
 		false,
+		true,
 		[]string{
 			"github.com/lib/pq",
 			"image",
@@ -74,8 +74,8 @@ var filterImportsTests = []struct {
 			"github.com/emil2k/vend/x",
 			"image",
 		},
-		false,
-		false,
+		true,
+		true,
 		[]string{
 			"github.com/lib/pq",
 		},

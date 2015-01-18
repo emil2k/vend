@@ -28,13 +28,13 @@ func list(ctx *build.Context, cwd, path string) error {
 
 // listFilter makes an import filter for the list command for the package
 // specified by the import path.
-// Can specify whether to include child and standard packages.
-func listFilter(ctx *build.Context, cwd, path string, child, standard bool) func(i string) bool {
+// Can specify whether to omit child or standard packages.
+func listFilter(ctx *build.Context, cwd, path string, omitChild, omitStd bool) func(i string) bool {
 	return func(i string) bool {
 		switch {
-		case !child && isChildPackage(path, i):
+		case omitChild && isChildPackage(path, i):
 			return false
-		case !standard && isStandardPackage(ctx, cwd, i):
+		case omitStd && isStandardPackage(ctx, cwd, i):
 			return false
 		}
 		return true
