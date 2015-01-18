@@ -83,11 +83,12 @@ var filterImportsTests = []struct {
 }
 
 // TestFilterImports testing the filterImports funtction using a table driven
-// tests.
+// tests. Uses the listFilter function to generate the filter.
 func TestFilterImports(t *testing.T) {
 	for _, tt := range filterImportsTests {
 		pre := fmt.Sprintf("std? %t child? %t : ", tt.std, tt.child)
-		out := filterImports(&build.Default, "", tt.parent, tt.imp, tt.std, tt.child)
+		f := listFilter(&build.Default, "", tt.parent, tt.child, tt.std)
+		out := filterImports(tt.imp, f)
 		if !reflect.DeepEqual(out, tt.out) {
 			t.Errorf(pre+"got %s, expected %s\n", out, tt.out)
 		}

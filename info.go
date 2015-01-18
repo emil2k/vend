@@ -18,12 +18,27 @@ func list(ctx *build.Context, cwd, path string) error {
 		return err
 	}
 	// List imports
-	imp := filterImports(ctx, cwd, pkg.ImportPath,
-		getImports(pkg, opt.tests), opt.standard, opt.child)
+	f := listFilter(ctx, cwd, pkg.ImportPath, opt.child, opt.standard)
+	imp := filterImports(getImports(pkg, opt.tests), f)
 	for _, v := range imp {
 		info(ctx, cwd, v)
 	}
 	return nil
+}
+
+// listFilter makes an import filter for the list command for the package
+// specified by the import path.
+// Can specify whether to include child and standard packages.
+func listFilter(ctx *build.Context, cwd, path string, child, standard bool) func(i string) bool {
+	return func(i string) bool {
+		switch {
+		case !child && isChildPackage(path, i):
+			return false
+		case !standard && isStandardPackage(ctx, cwd, i):
+			return false
+		}
+		return true
+	}
 }
 
 // info runs the info subcommand, printing information about a given package.
@@ -58,21 +73,15 @@ func info(ctx *build.Context, cwd, path string) error {
 	return nil
 }
 
-// filterImports filters the imports by either ommitting or including standard
-// and child packages, returns filtered slice of import paths.
-// TODO rewrite filtering this isn't a good way to do this.
-func filterImports(ctx *build.Context, cwd, parent string, imp []string, std, child bool) []string {
+// filterImports filters the passed imports based on the passed filter function,
+// which is passed in the import path and must return true if the import should
+// be included.
+func filterImports(imp []string, filter func(imp string) bool) []string {
 	r := make([]string, 0, len(imp))
-	for _, v := range imp {
-		// Filter child packages
-		if !child && isChildPackage(parent, v) {
-			continue
+	for _, i := range imp {
+		if filter(i) {
+			r = append(r, i)
 		}
-		// Filter standard packages
-		if !std && isStandardPackage(ctx, cwd, v) {
-			continue
-		}
-		r = append(r, v)
 	}
 	return r
 }

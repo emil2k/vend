@@ -27,8 +27,8 @@ func (d dupError) Error() string {
 
 // initc runs the init subcommand, copies all the external packages for the
 // package in the current working directory into the specified directory.
-// External packages are packages not located within subdirectory and not
-// standard packages.
+// External packages are packages not located in the standard library, a parent
+// directory, or a subdirectory.
 // Files are placed in subdirectories based on their package name, if there are
 // conflicts the command will fail with a message, those specific packages will
 // need to be copied with the cp command, before running init again.
@@ -37,8 +37,18 @@ func initc(ctx *build.Context, cwd, dst string) error {
 	if err != nil {
 		return err
 	}
-	imp := filterImports(ctx, cwd, pkg.ImportPath, getImports(pkg, true),
-		false, false)
+	f := func(i string) bool {
+		switch {
+		case isChildPackage(pkg.ImportPath, i): // in subdirectory
+			return false
+		case isChildPackage(i, pkg.ImportPath): // in parent directory
+			return false
+		case isStandardPackage(ctx, cwd, i):
+			return false
+		}
+		return true
+	}
+	imp := filterImports(getImports(pkg, true), f)
 	cps := make(map[string]string)    // dst directory to import path
 	dups := make(map[string][]string) // package name to import paths
 	hasDups := false

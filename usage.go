@@ -42,9 +42,9 @@ GOPATH.
 // initUsage describes usage of the init subcommand.
 const initUsage string = `
 For the package in the current working directory copies all external packages
-into the specified [directory], while updating all the import paths. External
-packages are packages that are not located in a subdirectory or a standard
-package. The specified [directory] is created if necessary.
+into the specified [directory], while updating all the import paths. The
+specified [directory] is created if necessary. External packages are packages
+not located in the standard library, a parent directory, or a subdirectory.
 
 The packages are copied into a subdirectory specified by the package name. If
 multiple dependencies have the same package name the command will fail and
