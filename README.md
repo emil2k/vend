@@ -38,7 +38,7 @@ the other packages.
   vend init [directory]
 
   -f=false: forces copy, replaces destination folder
-  -i=false: ignore hidden files, files starting with a dot
+  -i=false: include hidden files, files starting with a dot
   -v=false: detailed output
 ```
 
@@ -58,7 +58,7 @@ working directory.
   vend cp [from] [to]
 
   -f=false: forces copy, replaces destination folder
-  -i=false: ignore hidden files, files starting with a dot
+  -i=false: include hidden files, files starting with a dot
   -v=false: detailed output
 ```
 
@@ -79,7 +79,7 @@ directory. The `mv` subcommand cannot be used with standard packages, use
   vend mv [from] [to]
 
   -f=false: forces move, replaces destination folder
-  -i=false: ignore hidden files, files starting with a dot
+  -i=false: include hidden files, files starting with a dot
   -v=false: detailed output
 ```
 
