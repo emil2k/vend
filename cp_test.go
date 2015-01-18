@@ -44,6 +44,21 @@ func TestCp(t *testing.T) {
 	}
 }
 
+// TestCopyParentDir tests the copyDir function when copying a parent directory
+// into a child directory. Should avoid the situation where an infifinite copy
+// procedure, that makes  copies of copies.
+func TestCopyParentDir(t *testing.T) {
+	parent, err := ioutil.TempDir(os.TempDir(), "testcopyparentdir")
+	if err != nil {
+		t.Errorf("error when creating temp dir : %s\n", err.Error())
+	}
+	defer os.RemoveAll(parent)
+	child := filepath.Join(parent, "child")
+	if err := copyDir(parent, child); err != nil {
+		t.Errorf("error during copy : %s\n", err.Error())
+	}
+}
+
 // changePathParentTests are table tests for the changePathParent function.
 var changePathParentTests = []struct {
 	a, b, child, out string

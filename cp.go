@@ -136,6 +136,12 @@ func cwdAbs(base, path string) (string, error) {
 	return filepath.Join(base, path), nil
 }
 
+// copyFileJob holds a pending copyFile call.
+type copyFileJob struct {
+	si       os.FileInfo
+	src, dst string
+}
+
 // copyDir recursively copies the src directory to the desination directory.
 // Creates directories as necessary. Attempts to chmod everything to the src
 // mode.
@@ -143,6 +149,10 @@ func cwdAbs(base, path string) (string, error) {
 // copied file.
 // Skips hidden files base on the opt.hidden option.
 func copyDir(src, dst string) error {
+	// First compile a list of copies to execute then execute, otherwise
+	// infinite copy situations could arise when copying a parent directory
+	// into a child directory.
+	cjs := make([]copyFileJob, 0)
 	walk := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -164,9 +174,19 @@ func copyDir(src, dst string) error {
 			printBold(path)
 			fmt.Println(fileDst)
 		}
-		return copyFile(info, path, fileDst)
+		cjs = append(cjs, copyFileJob{info, path, fileDst})
+		return nil
 	}
-	return filepath.Walk(src, walk)
+	if err := filepath.Walk(src, walk); err != nil {
+		return err
+	}
+	// Execute copies
+	for _, cj := range cjs {
+		if err := copyFile(cj.si, cj.src, cj.dst); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // ErrIrregularFile is returned when attempts are made to copy links, pipes,
