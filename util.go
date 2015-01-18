@@ -55,7 +55,7 @@ func hasString(hay []string, needle string) bool {
 
 // appendUnique appends the provided strings to the list if they are not already
 // present inside.
-func appendUnique(list []string, add []string) []string {
+func appendUnique(list []string, add ...string) []string {
 	for _, v := range add {
 		if !hasString(list, v) {
 			list = append(list, v)

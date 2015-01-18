@@ -23,6 +23,9 @@ type optHolder struct {
 	quite bool
 	// verbose flag to increase output.
 	verbose bool
+	// recurse flag whether to recurse the command over all packages found
+	// in subdirectories.
+	recurse bool
 	// tests flag omits test files.
 	tests bool
 	// standard flag omits standard packages.
@@ -49,6 +52,8 @@ func init() {
 	list := flag.NewFlagSet("list", flag.ExitOnError)
 	list.Usage = usage(list, listUsage)
 	list.BoolVar(&opt.quite, "q", false, "outputs only import paths")
+	list.BoolVar(&opt.recurse, "r", false,
+		"include imports from packages located in subdirectories")
 	list.BoolVar(&opt.verbose, "v", false, "outputs details for each import")
 	list.BoolVar(&opt.tests, "t", false,
 		"omit test files when compiling imports")

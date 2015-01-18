@@ -110,6 +110,7 @@ the `GOPATH`.
 
   -c=false: omit child packages, located in subdirectories
   -q=false: outputs only import paths
+  -r=false: include imports from packages located in subdirectories
   -s=false: omit standard packages
   -t=false: omit test files when compiling imports
   -v=false: outputs details for each import
