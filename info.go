@@ -23,8 +23,9 @@ func list(ctx *build.Context, cwd, path string) error {
 	}
 	// Compile list of unique import paths, recurse if asked.
 	if opt.recurse {
-		err := recursePackages(ctx, cwd, process)
-		if err != nil {
+		if abs, err := cwdAbs(cwd, path); err != nil {
+			return err
+		} else if err := recursePackages(ctx, abs, process); err != nil {
 			return err
 		}
 	} else if pkg, err := getPackage(ctx, path); err != nil {

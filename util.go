@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/emil2k/vend/lib/ansi"
@@ -62,4 +63,14 @@ func appendUnique(list []string, add ...string) []string {
 		}
 	}
 	return list
+}
+
+// cwdAbs returns the path as absolute relative to the base directory if it is
+// not absolute.
+func cwdAbs(base, path string) (string, error) {
+	path = filepath.Clean(path)
+	if filepath.IsAbs(path) {
+		return path, nil
+	}
+	return filepath.Join(base, path), nil
 }

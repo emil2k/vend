@@ -126,16 +126,6 @@ func changePathParent(a, b, child string) (string, error) {
 	return filepath.ToSlash(filepath.Join(b, rel)), nil
 }
 
-// cwdAbs returns the path as absolute relative to the base directory if it is
-// not absolute.
-func cwdAbs(base, path string) (string, error) {
-	path = filepath.Clean(path)
-	if filepath.IsAbs(path) {
-		return path, nil
-	}
-	return filepath.Join(base, path), nil
-}
-
 // copyFileJob holds a pending copyFile call.
 type copyFileJob struct {
 	si       os.FileInfo
