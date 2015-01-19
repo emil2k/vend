@@ -3,13 +3,12 @@ package main
 import (
 	"go/build"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 )
 
 // getPackage compiles information about the package at the given path. First,
-// it tries to resolve the path as a relative path to the current working
+// it tries to resolve the path as a relative path to the passed current working
 // directory and then as an import path inside the GOPATH.
 // This function addresses issues with specifying a relative directory without
 // a preceding `./` and it attempts to gather the information in a manner that
@@ -17,10 +16,9 @@ import (
 // Returns an error if the resolved directory does not contain a buildable Go
 // package.
 // Compiles all the files ignoring build flags and any other build contstraints.
-func getPackage(ctx *build.Context, path string) (pkg *build.Package, err error) {
+func getPackage(ctx *build.Context, cwd, path string) (pkg *build.Package, err error) {
 	var stat os.FileInfo
-	// TODO pass ina cwd and change this to cwdAbs
-	if abs, err := filepath.Abs(path); err == nil {
+	if abs, err := cwdAbs(cwd, path); err == nil {
 		// Withouth the absolute path, does not set the ImportPath
 		// properly.
 		if stat, err = os.Stat(path); err == nil && stat.IsDir() {
@@ -66,8 +64,7 @@ func isChildPackage(parent, child string) bool {
 // isStandardPackage checks if the package is located in the standard library.
 // If an error is thrown during import assumes it is not in the standard library.
 func isStandardPackage(ctx *build.Context, cwd, path string) bool {
-	// TODO use getpackage here
-	if pkg, err := ctx.Import(path, cwd, build.FindOnly); err != nil {
+	if pkg, err := getPackage(ctx, cwd, path); err != nil {
 		return false
 	} else {
 		return pkg.Goroot

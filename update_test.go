@@ -19,13 +19,12 @@ func TestUpdate(t *testing.T) {
 		t.Error(err.Error())
 	}
 	defer os.RemoveAll(dst)
-	// TODO create test context
-	if srcPkg, err := getPackage(&build.Default, "encoding/json"); err != nil {
+	if srcPkg, err := getPackage(&build.Default, "", "encoding/json"); err != nil {
 		t.Errorf("error during src import : %s\n", err.Error())
 	} else if err := copyDir(srcPkg.Dir, dst); err != nil {
 		t.Errorf("error while copying standard package : %s\n",
 			err.Error())
-	} else if pkg, err := getPackage(&build.Default, dst); err != nil {
+	} else if pkg, err := getPackage(&build.Default, "", dst); err != nil {
 		t.Errorf("error while importing copied package : %s\n",
 			err.Error())
 	} else if err := update(pkg.Dir, map[string]string{

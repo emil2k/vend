@@ -28,7 +28,7 @@ func list(ctx *build.Context, cwd, path string) error {
 		} else if err := recursePackages(ctx, abs, process); err != nil {
 			return err
 		}
-	} else if pkg, err := getPackage(ctx, path); err != nil {
+	} else if pkg, err := getPackage(ctx, cwd, path); err != nil {
 		return err
 	} else {
 		process(pkg)
@@ -72,7 +72,7 @@ func recursePackages(ctx *build.Context, dir string, f func(p *build.Package) er
 		// package ), which causes errors when importing with the
 		// go/build package, this ignores those errors and if .go files
 		// are found in a directory a package is returned.
-		pkg, _ := getPackage(ctx, path)
+		pkg, _ := getPackage(ctx, dir, path)
 		if len(pkg.GoFiles) > 0 || len(pkg.CgoFiles) > 0 ||
 			len(pkg.TestGoFiles) > 0 || len(pkg.XTestGoFiles) > 0 {
 			pkgs = append(pkgs, pkg)
@@ -110,7 +110,7 @@ func listFilter(ctx *build.Context, cwd, path string, omitChild, omitStd bool) f
 // Also used by the list command to output details about imports, the quite and
 // verbose flags determine the output.
 func info(ctx *build.Context, cwd, path string) error {
-	pkg, err := getPackage(ctx, path)
+	pkg, err := getPackage(ctx, cwd, path)
 	// Error could be that the directory had multiple packages, if the
 	// import path was determined proceed.
 	if err != nil && len(pkg.ImportPath) == 0 {

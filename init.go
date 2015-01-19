@@ -33,7 +33,7 @@ func (d dupError) Error() string {
 // conflicts the command will fail with a message, those specific packages will
 // need to be copied with the cp command, before running init again.
 func initc(ctx *build.Context, cwd, dst string) error {
-	pkg, err := getPackage(ctx, cwd)
+	pkg, err := getPackage(ctx, cwd, cwd)
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func initc(ctx *build.Context, cwd, dst string) error {
 	dups := make(map[string][]string) // package name to import paths
 	hasDups := false
 	for _, i := range imp {
-		cpPkg, err := getPackage(ctx, i)
+		cpPkg, err := getPackage(ctx, cwd, i)
 		if err != nil {
 			return err
 		}

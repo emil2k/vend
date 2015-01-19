@@ -41,7 +41,7 @@ func cp(ctx *build.Context, cwd, src, dst string) (err error) {
 	// that is necessary here is the directory and the import path.
 	// Can't use the build.MultiplePackageError, to detect the error because
 	// it was only added in 1.4, and we want 1.2+.
-	if srcPkg, err = getPackage(ctx, src); len(srcPkg.Dir) == 0 {
+	if srcPkg, err = getPackage(ctx, cwd, src); len(srcPkg.Dir) == 0 {
 		if err == nil {
 			return fmt.Errorf("package has no directory")
 		}
@@ -61,14 +61,14 @@ func cp(ctx *build.Context, cwd, src, dst string) (err error) {
 	// Determine import path of the new package, and update import paths in
 	// the current working directory.
 	// Update the import paths of the new package and its children.
-	if dstPkg, err = getPackage(ctx, dst); len(dstPkg.ImportPath) == 0 {
+	if dstPkg, err = getPackage(ctx, cwd, dst); len(dstPkg.ImportPath) == 0 {
 		return
 	} else {
 		dstImp = dstPkg.ImportPath
 	}
 	// Get a list of all imports for the package in the current working
 	// directory, to determine which child package also need to be updated.
-	if cwdPkg, err = getPackage(ctx, cwd); err != nil {
+	if cwdPkg, err = getPackage(ctx, cwd, cwd); err != nil {
 		return
 	}
 	// Compile map of import paths to change.
@@ -101,7 +101,7 @@ var ErrStandardPackage = errors.New("standard package specified")
 // Just like cp, but cannot be used with standard packages and removes the
 // source directory afterwards.
 func mv(ctx *build.Context, cwd, src, dst string) (err error) {
-	srcPkg, err := getPackage(ctx, src)
+	srcPkg, err := getPackage(ctx, cwd, src)
 	if err != nil {
 		return err
 	} else if srcPkg.Goroot {

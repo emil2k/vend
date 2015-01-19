@@ -33,7 +33,7 @@ func TestCp(t *testing.T) {
 		t.Errorf("error during cp : %s\n", err.Error())
 	}
 	// Check if import paths updated
-	cpPkg, err := getPackage(&tmp, cwdDst.ImportPath)
+	cpPkg, err := getPackage(&tmp, cwdDst.Dir, cwdDst.ImportPath)
 	if err != nil {
 		t.Errorf("error importing cped package : %s\n", err)
 	}
@@ -94,7 +94,7 @@ func copyPackage(t *testing.T, tmp *build.Context, path string) (src, dst *build
 		t.FailNow()
 	}
 	dstDir := filepath.Join(tmp.GOROOT, pkgPath, filepath.FromSlash(path))
-	if src, err = getPackage(&build.Default, path); err != nil {
+	if src, err = getPackage(&build.Default, "", path); err != nil {
 		t.Errorf("error importing src package : %s\n", err.Error())
 		t.FailNow()
 	}
@@ -102,7 +102,7 @@ func copyPackage(t *testing.T, tmp *build.Context, path string) (src, dst *build
 		t.Errorf("error while copying directory : %s\n", err.Error())
 		t.FailNow()
 	}
-	if dst, err = getPackage(tmp, path); err != nil {
+	if dst, err = getPackage(tmp, "", path); err != nil {
 		t.Errorf("error importing dst package : %s\n", err.Error())
 		t.FailNow()
 	}
