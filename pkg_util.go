@@ -1,11 +1,23 @@
 package main
 
 import (
+	"errors"
 	"go/build"
 	"os"
 	"sort"
 	"strings"
 )
+
+// ErrPseudoPackage is returned when attempting to access a pseudo package like
+// "C".
+var ErrPseudoPackage = errors.New("pseudo package")
+
+// cPackage is returned when trying to import the "C" package.
+var cPackage = &build.Package{
+	ImportPath: "C",
+	Goroot:     true,
+	Doc:        "Package C is a pseudo package that enables calls to C code via cgo.",
+}
 
 // getPackage compiles information about the package at the given path. First,
 // it tries to resolve the path as a relative path to the passed current working
@@ -15,6 +27,8 @@ import (
 // allows it to set the ImportPath attribute.
 // Returns an error if the resolved directory does not contain a buildable Go
 // package.
+// For the special pseudo-package "C" it returns a partial package with an
+// import path, Goroot true, and doc string along with an ErrPseudoPackage.
 // Compiles all the files ignoring build flags and any other build contstraints.
 func getPackage(ctx *build.Context, cwd, path string) (pkg *build.Package, err error) {
 	var stat os.FileInfo
@@ -24,6 +38,10 @@ func getPackage(ctx *build.Context, cwd, path string) (pkg *build.Package, err e
 		if stat, err = os.Stat(path); err == nil && stat.IsDir() {
 			return ctx.ImportDir(abs, 0)
 		}
+	}
+	// Handle special case of the pseudo
+	if path == "C" {
+		return cPackage, ErrPseudoPackage
 	}
 	return ctx.Import(path, "", 0)
 }
@@ -64,7 +82,7 @@ func isChildPackage(parent, child string) bool {
 // isStandardPackage checks if the package is located in the standard library.
 // If an error is thrown during import assumes it is not in the standard library.
 func isStandardPackage(ctx *build.Context, cwd, path string) bool {
-	if pkg, err := getPackage(ctx, cwd, path); err != nil {
+	if pkg, err := getPackage(ctx, cwd, path); err != nil && err != ErrPseudoPackage {
 		return false
 	} else {
 		return pkg.Goroot

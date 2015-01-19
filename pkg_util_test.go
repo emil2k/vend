@@ -26,6 +26,9 @@ func TestIsStandardPackage(t *testing.T) {
 	if x := isStandardPackage(&build.Default, "", "image"); !x {
 		t.Error("expected true")
 	}
+	if x := isStandardPackage(&build.Default, "", "C"); !x {
+		t.Error("expected true")
+	}
 	if x := isStandardPackage(&build.Default, "", "github.com/emil2k/vend"); x {
 		t.Error("expected false")
 	}
