@@ -22,7 +22,9 @@ var ErrDstExists = errors.New("destination already exists")
 // absolute path cannot be determined either for the source or destination.
 // Updates imports inside the copied package itself, may have a test package
 // inside the directory that imports itself.
-func cp(ctx *build.Context, cwd, src, dst string) (err error) {
+// Based on skipCopy determines whether to actually copy the directories or just
+// update paths.
+func cp(ctx *build.Context, cwd, src, dst string, skipCopy bool) (err error) {
 	// Check if destination folder exists and based on force flag determine
 	// action.
 	if _, serr := os.Stat(dst); serr == nil {
@@ -55,8 +57,14 @@ func cp(ctx *build.Context, cwd, src, dst string) (err error) {
 		return
 	} else if dst, err = cwdAbs(cwd, dst); err != nil {
 		return
-	} else if err = copyDir(src, dst); err != nil {
-		return
+	}
+	// Skip copying the directory if necessary
+	if !skipCopy {
+		if err = copyDir(src, dst); err != nil {
+			return
+		}
+	} else {
+		fmt.Printf("skip copy %s => %s\n", src, dst)
 	}
 	// Determine import path of the new package, and update import paths in
 	// the current working directory.
@@ -107,7 +115,7 @@ func mv(ctx *build.Context, cwd, src, dst string) (err error) {
 	} else if srcPkg.Goroot {
 		return ErrStandardPackage
 	}
-	if err := cp(ctx, cwd, src, dst); err != nil {
+	if err := cp(ctx, cwd, src, dst, false); err != nil {
 		return err
 	}
 	return os.RemoveAll(src)

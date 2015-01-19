@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"go/build"
-	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -14,7 +12,7 @@ import (
 // directory.
 func list(ctx *build.Context, cwd, path string) error {
 	imps := make([]string, 0)
-	process := func(pkg *build.Package) error {
+	process := func(pkg *build.Package, err error) error {
 		f := listFilter(ctx, cwd, pkg.ImportPath, opt.child, opt.standard)
 		for _, add := range filterImports(getImports(pkg, opt.tests), f) {
 			imps = appendUnique(imps, add)
@@ -31,7 +29,7 @@ func list(ctx *build.Context, cwd, path string) error {
 	} else if pkg, err := getPackage(ctx, cwd, path); err != nil {
 		return err
 	} else {
-		process(pkg)
+		process(pkg, nil)
 	}
 	// Output the imports
 	sort.Strings(imps)
@@ -39,52 +37,6 @@ func list(ctx *build.Context, cwd, path string) error {
 		if opt.quite {
 			fmt.Println(imp)
 		} else if err := info(ctx, cwd, imp); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// recursePackages recurses all the directories starting with the specified
-// directory, called the passed function for all the packages that are found.
-// Returns an error if the passed function returns an error for any of the found
-// packages and in case of permissions issues during recursion.
-func recursePackages(ctx *build.Context, dir string, f func(p *build.Package) error) error {
-	// Compile list of functions first then call function on them, as the
-	// function may change the packages themselves.
-	pkgs := make([]*build.Package, 0)
-	walk := func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		} else if !info.IsDir() { // only directories
-			return nil
-		} else if rel, err := filepath.Rel(dir, path); err != nil {
-			return err
-		} else if rel != "." && rel != ".." &&
-			strings.HasPrefix(rel, ".") {
-			if info.IsDir() {
-				return filepath.SkipDir
-			} else {
-				return nil
-			}
-		}
-		// Directories may contain multiple packages ( an external test
-		// package ), which causes errors when importing with the
-		// go/build package, this ignores those errors and if .go files
-		// are found in a directory a package is returned.
-		pkg, _ := getPackage(ctx, dir, path)
-		if len(pkg.GoFiles) > 0 || len(pkg.CgoFiles) > 0 ||
-			len(pkg.TestGoFiles) > 0 || len(pkg.XTestGoFiles) > 0 {
-			pkgs = append(pkgs, pkg)
-		}
-		return nil
-	}
-	if err := filepath.Walk(dir, walk); err != nil {
-		return err
-	}
-	// Call function on packages
-	for _, p := range pkgs {
-		if err := f(p); err != nil {
 			return err
 		}
 	}

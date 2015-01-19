@@ -4,6 +4,7 @@ import (
 	"errors"
 	"go/build"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -46,6 +47,51 @@ func getPackage(ctx *build.Context, cwd, path string) (pkg *build.Package, err e
 	return ctx.Import(path, "", 0)
 }
 
+// packageResult holds a result from calling importing a package.
+type packageResult struct {
+	pkg *build.Package
+	err error
+}
+
+// recursePackages recurses all the directories starting with the specified
+// directory, called the passed function for all the packages that are found.
+// Compile list of packages then calls function on them, as the function may
+// change the packages themselves.
+// Returns an error if the passed function returns an error for any of the found
+// packages and in case of permissions issues during recursion.
+func recursePackages(ctx *build.Context, dir string, f func(p *build.Package, err error) error) error {
+	pkgs := make([]packageResult, 0)
+	walk := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		} else if !info.IsDir() { // only directories
+			return nil
+		} else if rel, err := filepath.Rel(dir, path); err != nil {
+			return err
+		} else if rel != "." && rel != ".." &&
+			strings.HasPrefix(rel, ".") {
+			if info.IsDir() {
+				return filepath.SkipDir
+			} else {
+				return nil
+			}
+		}
+		pkg, err := getPackage(ctx, dir, path)
+		pkgs = append(pkgs, packageResult{pkg, err})
+		return nil
+	}
+	if err := filepath.Walk(dir, walk); err != nil {
+		return err
+	}
+	// Call function on packages
+	for _, p := range pkgs {
+		if err := f(p.pkg, p.err); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // getImports compiles a list of all the imports by appending TestImports and
 // XTestImports to Imports as necessary. Returns a sorted slice with unique
 // elements.
@@ -82,9 +128,6 @@ func isChildPackage(parent, child string) bool {
 // isStandardPackage checks if the package is located in the standard library.
 // If an error is thrown during import assumes it is not in the standard library.
 func isStandardPackage(ctx *build.Context, cwd, path string) bool {
-	if pkg, err := getPackage(ctx, cwd, path); err != nil && err != ErrPseudoPackage {
-		return false
-	} else {
-		return pkg.Goroot
-	}
+	pkg, _ := getPackage(ctx, cwd, path)
+	return pkg.Goroot
 }

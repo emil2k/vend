@@ -29,7 +29,7 @@ func TestCp(t *testing.T) {
 	tmp.GOROOT = goRoot
 	_, cwdDst := copyPackage(t, &tmp, "encoding/json")
 	_, cpDst := copyPackage(t, &tmp, "unicode")
-	if err := cp(&tmp, cwdDst.Dir, "unicode", "lib/myuni"); err != nil {
+	if err := cp(&tmp, cwdDst.Dir, "unicode", "lib/myuni", false); err != nil {
 		t.Errorf("error during cp : %s\n", err.Error())
 	}
 	// Check if import paths updated

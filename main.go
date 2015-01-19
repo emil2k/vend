@@ -56,7 +56,7 @@ func main() {
 			f := flagMap["cp"]
 			f.Parse(os.Args[2:])
 			if len(f.Args()) > 1 {
-				err = cp(ctx, cwd, f.Arg(0), f.Arg(1))
+				err = cp(ctx, cwd, f.Arg(0), f.Arg(1), false)
 			} else {
 				printErr("Missing arguments")
 				f.Usage()

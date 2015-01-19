@@ -20,17 +20,31 @@ func TestIsChildPackage(t *testing.T) {
 	}
 }
 
+// isStandardPackageTests holds table tests for the isStandardPackage function.
+var isStandardPackageTests = []struct {
+	path     string
+	standard bool // expectation
+}{
+	{"image", true},
+	{"C", true},
+	{"github.com/emil2k/vend", false},
+	{"runtime", true}, // directory has multiple packages
+	{"strconv", true}, // directory has multiple packages
+	{"time", true},    // directory has multiple packages
+}
+
 // TestIsStandardPackage tests if the image package is a standard package using
 // the isStandardPackage function, and tests that this package is not.
+// Tests with build context that includes all files to emulate how packages are
+// parsed by the tool.
 func TestIsStandardPackage(t *testing.T) {
-	if x := isStandardPackage(&build.Default, "", "image"); !x {
-		t.Error("expected true")
-	}
-	if x := isStandardPackage(&build.Default, "", "C"); !x {
-		t.Error("expected true")
-	}
-	if x := isStandardPackage(&build.Default, "", "github.com/emil2k/vend"); x {
-		t.Error("expected false")
+	ctx := &build.Default
+	ctx.UseAllFiles = true
+	for _, tt := range isStandardPackageTests {
+		if x := isStandardPackage(ctx, "", tt.path); x != tt.standard {
+			t.Errorf("%s standard %t, expected %t\n",
+				tt.path, x, tt.standard)
+		}
 	}
 }
 

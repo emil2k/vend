@@ -80,6 +80,8 @@ func init() {
 	init := flag.NewFlagSet("init", flag.ExitOnError)
 	init.Usage = usage(init, initUsage)
 	init.BoolVar(&opt.verbose, "v", false, "detailed output")
+	init.BoolVar(&opt.recurse, "r", false,
+		"recurse into subdirectories to vend their imports as well")
 	init.BoolVar(&opt.force, "f", false,
 		"forces copy, replaces destination folder")
 	init.BoolVar(&opt.hidden, "i", false,

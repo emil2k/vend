@@ -44,11 +44,12 @@ those packages in unique directories before running `vend init` again to process
 the other packages.
 
 ```
-  vend init [directory]
+vend init [directory]
 
-  -f=false: forces copy, replaces destination folder
-  -i=false: include hidden files, files starting with a dot
-  -v=false: detailed output
+-f=false: forces copy, replaces destination folder
+-i=false: include hidden files, files starting with a dot
+-r=false: recurse into subdirectories to vend their imports as well
+-v=false: detailed output
 ```
 
 Example :
@@ -64,11 +65,11 @@ directory, updating the necessary import paths for the package in the current
 working directory.
 
 ```
-  vend cp [from] [to]
+vend cp [from] [to]
 
-  -f=false: forces copy, replaces destination folder
-  -i=false: include hidden files, files starting with a dot
-  -v=false: detailed output
+-f=false: forces copy, replaces destination folder
+-i=false: include hidden files, files starting with a dot
+-v=false: detailed output
 ```
 
 Example :
@@ -85,11 +86,11 @@ directory. The `mv` subcommand cannot be used with standard packages, use
 `cp` instead.
 
 ```
-  vend mv [from] [to]
+vend mv [from] [to]
 
-  -f=false: forces move, replaces destination folder
-  -i=false: include hidden files, files starting with a dot
-  -v=false: detailed output
+-f=false: forces move, replaces destination folder
+-i=false: include hidden files, files starting with a dot
+-v=false: detailed output
 ```
 
 Example :
@@ -106,14 +107,14 @@ relative to the current working directory or as an import path resolved through
 the `GOPATH`.
 
 ```
-  vend list [arguments] [path]
+vend list [arguments] [path]
 
-  -c=false: omit child packages, located in subdirectories
-  -q=false: outputs only import paths
-  -r=false: include imports from packages located in subdirectories
-  -s=false: omit standard packages
-  -t=false: omit test files when compiling imports
-  -v=false: outputs details for each import
+-c=false: omit child packages, located in subdirectories
+-q=false: outputs only import paths
+-r=false: include imports from packages located in subdirectories
+-s=false: omit standard packages
+-t=false: omit test files when compiling imports
+-v=false: outputs details for each import
 ```
 
 ### `vend info`
@@ -124,9 +125,9 @@ specified relative to the current working directory or as an import path
 resolved through the `GOPATH`.
 
 ```
-  vend info [arguments] [path]
+vend info [arguments] [path]
 
-  -v=false: detailed output
+-v=false: detailed output
 ```
 
 ### TODO: `vend name`
