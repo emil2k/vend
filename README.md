@@ -69,6 +69,7 @@ vend cp [from] [to]
 
 -f=false: forces copy, replaces destination folder
 -i=false: include hidden files, files starting with a dot
+-r=false: recurse into subdirectories to include their dependencies
 -v=false: detailed output
 ```
 
@@ -90,6 +91,7 @@ vend mv [from] [to]
 
 -f=false: forces move, replaces destination folder
 -i=false: include hidden files, files starting with a dot
+-r=false: recurse into subdirectories to update their import paths of the moved packages
 -v=false: detailed output
 ```
 

@@ -10,10 +10,10 @@ import (
 	"testing"
 )
 
-// TestUpdate copies a standard package then update its import paths and checks
+// TestRWDir copies a standard package then update its import paths and checks
 // to make sure that they were updated.
 // Removes the copied package when done with it.
-func TestUpdate(t *testing.T) {
+func TestRWDir(t *testing.T) {
 	dst, err := ioutil.TempDir(os.TempDir(), "testupdate")
 	if err != nil {
 		t.Error(err.Error())
@@ -27,7 +27,7 @@ func TestUpdate(t *testing.T) {
 	} else if pkg, err := getPackage(&build.Default, "", dst); err != nil {
 		t.Errorf("error while importing copied package : %s\n",
 			err.Error())
-	} else if err := update(pkg.Dir, map[string]string{
+	} else if err := rwDir(pkg.Dir, map[string]string{
 		"unicode": "myuni",
 	}); err != nil {
 		t.Errorf("error during update : %s\n", err.Error())

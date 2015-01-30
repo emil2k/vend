@@ -46,7 +46,7 @@ func main() {
 			f := flagMap["init"]
 			f.Parse(os.Args[2:])
 			if len(f.Args()) > 0 {
-				err = initc(ctx, cwd, f.Arg(0))
+				err = initc(ctx, cwd, f.Arg(0), opt.recurse)
 			} else {
 				printErr("Missing argument")
 				f.Usage()
@@ -56,7 +56,7 @@ func main() {
 			f := flagMap["cp"]
 			f.Parse(os.Args[2:])
 			if len(f.Args()) > 1 {
-				err = cp(ctx, cwd, f.Arg(0), f.Arg(1), false)
+				err = cp(ctx, cwd, f.Arg(0), f.Arg(1), opt.recurse)
 			} else {
 				printErr("Missing arguments")
 				f.Usage()
@@ -66,7 +66,7 @@ func main() {
 			f := flagMap["mv"]
 			f.Parse(os.Args[2:])
 			if len(f.Args()) > 1 {
-				err = mv(ctx, cwd, f.Arg(0), f.Arg(1))
+				err = mv(ctx, cwd, f.Arg(0), f.Arg(1), opt.recurse)
 				if err == ErrStandardPackage {
 					printErr("Cannot move standard package")
 					f.Usage()

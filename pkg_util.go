@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"go/build"
 	"os"
 	"path/filepath"
@@ -130,4 +131,22 @@ func isChildPackage(parent, child string) bool {
 func isStandardPackage(ctx *build.Context, cwd, path string) bool {
 	pkg, _ := getPackage(ctx, cwd, path)
 	return pkg.Goroot
+}
+
+// getImportPath returns the import path of the path, the path is resolved
+// relative to the cwd.
+// Returns an error if the path is not the GOROOT or GOPATH.
+func getImportPath(cwd, path string) (string, error) {
+	path, err := cwdAbs(cwd, path)
+	if err != nil {
+		return "", err
+	}
+	ps := filepath.SplitList(build.Default.GOROOT)
+	ps = append(ps, filepath.SplitList(build.Default.GOPATH)...)
+	for _, p := range ps {
+		if imp, err := filepath.Rel(p, path); err == nil {
+			return imp, nil
+		}
+	}
+	return "", fmt.Errorf("%s path not located in GOROOT/GOPATH", path)
 }

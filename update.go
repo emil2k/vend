@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/build"
 	"go/parser"
 	"go/printer"
 	"go/token"
@@ -12,10 +13,56 @@ import (
 	"github.com/emil2k/vend/lib/astutil"
 )
 
-// update goes through the package in the srcDir and updates import path as
+// update subcommand updates the import paths in the `src` directory that
+// contain the `from` import or an import located in its subdirectory to the
+// equivalent import in the `to` path.
+// Recurses into subdirectories to update import paths based on the `recurse`
+// parameter.
+func update(ctx *build.Context, src, from, to string, recurse bool) error {
+	process := func(srcPkg *build.Package, _ error) error {
+		// Get a list of all imports for the package in the src
+		// directory, to determine which child package also need to be
+		// updated.
+		srcImp, srcDir := srcPkg.ImportPath, srcPkg.Dir
+		if len(srcImp) == 0 || len(srcDir) == 0 {
+			return fmt.Errorf("no import path or directory for src package")
+		}
+		// Compile map of import paths to change.
+		rw := make(map[string]string)
+		// Get the children of the src package their import paths will
+		// be updated as well.
+		for _, a := range getImports(srcPkg, true) {
+			switch {
+			case from == a:
+				rw[from] = to
+			case isChildPackage(from, a):
+				cp, err := changePathParent(from, to, a)
+				if err != nil {
+					return err
+				}
+				rw[a] = cp
+			}
+		}
+		if len(rw) > 0 {
+			return rwDir(srcDir, rw)
+		}
+		return nil
+	}
+	if recurse {
+		// Recurse into subdirectory packages.
+		if err := recursePackages(ctx, src, process); err != nil {
+			return err
+		}
+	} else if err := process(getPackage(ctx, src, src)); err != nil {
+		return err
+	}
+	return nil
+}
+
+// rwDir goes through the package in the srcDir and updates import path as
 // specified by the rw map, from key to value.
 // Returns an error if unable to parse the package or if writing to a file.
-func update(srcDir string, rw map[string]string) error {
+func rwDir(srcDir string, rw map[string]string) error {
 	fs := token.NewFileSet()
 	mode := parser.AllErrors | parser.ParseComments
 	pkgs, err := parser.ParseDir(fs, srcDir, nil, mode)

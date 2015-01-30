@@ -67,30 +67,34 @@ func init() {
 	info.Usage = usage(info, infoUsage)
 	info.BoolVar(&opt.verbose, "v", false, "detailed output")
 	flagMap["info"] = info
-	// Cp flagset
-	cp := flag.NewFlagSet("cp", flag.ExitOnError)
-	cp.Usage = usage(cp, cpUsage)
-	cp.BoolVar(&opt.verbose, "v", false, "detailed output")
-	cp.BoolVar(&opt.force, "f", false,
-		"forces copy, replaces destination folder")
-	cp.BoolVar(&opt.hidden, "i", false,
-		"include hidden files, files starting with a dot")
-	flagMap["cp"] = cp
 	// Init flagset
 	init := flag.NewFlagSet("init", flag.ExitOnError)
 	init.Usage = usage(init, initUsage)
 	init.BoolVar(&opt.verbose, "v", false, "detailed output")
 	init.BoolVar(&opt.recurse, "r", false,
-		"recurse into subdirectories to vend their imports as well")
+		"recurse into subdirectories to include their dependencies")
 	init.BoolVar(&opt.force, "f", false,
 		"forces copy, replaces destination folder")
 	init.BoolVar(&opt.hidden, "i", false,
 		"include hidden files, files starting with a dot")
 	flagMap["init"] = init
+	// Cp flagset
+	cp := flag.NewFlagSet("cp", flag.ExitOnError)
+	cp.Usage = usage(cp, cpUsage)
+	cp.BoolVar(&opt.verbose, "v", false, "detailed output")
+	cp.BoolVar(&opt.recurse, "r", false,
+		"recurse into subdirectories to update their import paths of the copied packages")
+	cp.BoolVar(&opt.force, "f", false,
+		"forces copy, replaces destination folder")
+	cp.BoolVar(&opt.hidden, "i", false,
+		"include hidden files, files starting with a dot")
+	flagMap["cp"] = cp
 	// Mv flagset
 	mv := flag.NewFlagSet("mv", flag.ExitOnError)
 	mv.Usage = usage(mv, mvUsage)
 	mv.BoolVar(&opt.verbose, "v", false, "detailed output")
+	mv.BoolVar(&opt.recurse, "r", false,
+		"recurse into subdirectories to update their import paths of the moved packages")
 	mv.BoolVar(&opt.force, "f", false,
 		"forces move, replaces destination folder")
 	mv.BoolVar(&opt.hidden, "i", false,
