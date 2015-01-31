@@ -69,7 +69,11 @@ func info(ctx *build.Context, cwd, path string) error {
 		return err
 	}
 	// Default output
-	printBold(fmt.Sprintf("%s (%s)", pkg.Name, pkg.ImportPath))
+	if len(pkg.Name) == 0 {
+		printBold(fmt.Sprintf("%s", pkg.ImportPath))
+	} else {
+		printBold(fmt.Sprintf("%s (%s)", pkg.ImportPath, pkg.Name))
+	}
 	// Print package doc with line breaks
 	if len(pkg.Doc) > 0 {
 		printWrap(72, pkg.Doc)
