@@ -91,6 +91,14 @@ func rwFile(fs *token.FileSet, f *ast.File, rw map[string]string) error {
 	return nil
 }
 
+// printerConfig configures the AST pretty printing, it should use space for
+// alignment and tabs to indent to mirror gofmt.
+var printerConfig = &printer.Config{
+	Mode:     printer.UseSpaces | printer.TabIndent,
+	Tabwidth: 8,
+	Indent:   0,
+}
+
 // rwImport rewrites the import path from the old path, op, to the new path, np,
 // inside a file and then writes the changes to it.
 // If the old path is not used in a file nothing and an nil error is returned.
@@ -112,7 +120,8 @@ func rwImport(fs *token.FileSet, f *ast.File, op, np string) (err error) {
 				err = cerr
 			}
 		}()
-		if err = printer.Fprint(wf, fs, f); err != nil {
+		// Print properly
+		if err = printerConfig.Fprint(wf, fs, f); err != nil {
 			return err
 		}
 		// Output
