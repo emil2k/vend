@@ -21,24 +21,28 @@ func initc(ctx *build.Context, cwd, dst string, recurse bool) error {
 	if err != nil {
 		return err
 	}
+	cwdPkg, _ := getPackage(ctx, cwd, cwd)
+	if len(cwdPkg.ImportPath) == 0 {
+		return fmt.Errorf("no import path for package in current directory")
+	}
+	// Filter for the imports to copy into dst directory
+	f := func(i string) bool {
+		switch {
+		case isChildPackage(cwdPkg.ImportPath, i):
+			return false // in a subdirectory
+		case isChildPackage(i, cwdPkg.ImportPath):
+			return false // in a parent diretory
+		case isStandardPackage(ctx, cwd, i):
+			return false
+		}
+		return true
+	}
 	dsts := make([]string, 0)         // list of destination directories
 	cps := make([]cpJob, 0)           // list of pending cp calls
 	updates := make([]updateJob, 0)   // list of pending update calls
 	dups := make(map[string][]string) // package name to import paths
 	hasDups := false
 	process := func(pkg *build.Package, err error) error {
-		// Filter for the imports to copy into dst directory
-		f := func(i string) bool {
-			switch {
-			case isChildPackage(pkg.ImportPath, i):
-				return false // in a subdirectory
-			case isChildPackage(i, pkg.ImportPath):
-				return false // in a parent diretory
-			case isStandardPackage(ctx, cwd, i):
-				return false
-			}
-			return true
-		}
 		imp := filterImports(getImports(pkg, true), f)
 		for _, i := range imp {
 			cpPkg, _ := getPackage(ctx, cwd, i)
@@ -46,7 +50,7 @@ func initc(ctx *build.Context, cwd, dst string, recurse bool) error {
 				return fmt.Errorf("no import path for %s", i)
 			} else if len(cpPkg.Name) == 0 || len(cpPkg.Dir) == 0 {
 				// Skip packages without a package name, most
-				// likely they have not been retrieved.
+				// likely they have not been retreived.
 				fmt.Printf("skipping %s, was not found\n",
 					cpPkg.ImportPath)
 				continue
@@ -71,9 +75,7 @@ func initc(ctx *build.Context, cwd, dst string, recurse bool) error {
 		if err := recursePackages(ctx, cwd, process); err != nil {
 			return err
 		}
-	} else if pkg, err := getPackage(ctx, cwd, cwd); err != nil {
-		return err
-	} else if err := process(pkg, nil); err != nil {
+	} else if err := process(cwdPkg, nil); err != nil {
 		return err
 	}
 	// Report back if there is any packages with the same package name.
