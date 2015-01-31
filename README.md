@@ -48,7 +48,7 @@ vend init [directory]
 
 -f=false: forces copy, replaces destination folder
 -i=false: include hidden files, files starting with a dot
--r=false: recurse into subdirectories to vend their imports as well
+-r=false: recurse into subdirectories to include their dependencies
 -v=false: detailed output
 ```
 
@@ -69,7 +69,7 @@ vend cp [from] [to]
 
 -f=false: forces copy, replaces destination folder
 -i=false: include hidden files, files starting with a dot
--r=false: recurse into subdirectories to include their dependencies
+-r=false: recurse into subdirectories to update their import paths of the copied packages
 -v=false: detailed output
 ```
 
