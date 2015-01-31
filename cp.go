@@ -90,10 +90,11 @@ var ErrStandardPackage = errors.New("standard package specified")
 // Just like cp, but cannot be used with standard packages and removes the
 // source directory afterwards.
 func mv(ctx *build.Context, cwd, src, dst string, recurse bool) (err error) {
-	srcPkg, err := getPackage(ctx, cwd, src)
-	if err != nil {
-		return err
-	} else if srcPkg.Goroot {
+	// Ignore the error because the directory itself might not be a package
+	// but may contain subdirectories that do, all we want to know here is
+	// if it is in the GOROOT.
+	srcPkg, _ := getPackage(ctx, cwd, src)
+	if srcPkg.Goroot {
 		return ErrStandardPackage
 	}
 	if err := cp(ctx, cwd, src, dst, recurse); err != nil {
