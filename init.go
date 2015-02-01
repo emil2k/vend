@@ -60,7 +60,7 @@ func initc(ctx *build.Context, cwd, dst string, recurse bool) error {
 				hasDups = true
 				cps = append(cps,
 					cpJob{pkg.Dir, cpPkg.ImportPath, cpDst, false})
-			} else if cpImportPath, err := getImportPath(cwd, cpDst); err != nil {
+			} else if cpImportPath, err := getImportPath(ctx, cwd, cpDst); err != nil {
 				return err
 			} else {
 				updates = append(updates,
@@ -91,7 +91,6 @@ func initc(ctx *build.Context, cwd, dst string, recurse bool) error {
 	}
 	// Run update commands on other packages that need updating.
 	for _, uj := range updates {
-		fmt.Println("update imports in :", uj.src)
 		if err := update(ctx, uj.src, uj.from, uj.to, uj.recurse); err != nil {
 			return err
 		}

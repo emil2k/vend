@@ -133,20 +133,48 @@ func isStandardPackage(ctx *build.Context, cwd, path string) bool {
 	return pkg.Goroot
 }
 
-// getImportPath returns the import path of the path, the path is resolved
-// relative to the cwd.
-// Returns an error if the path is not the GOROOT or GOPATH.
-func getImportPath(cwd, path string) (string, error) {
+// ErrNotInGoPath is returned when a path that needs to be resolved to an import
+// path is not located in any of the GOPATHs.
+var ErrNotInGoPath = fmt.Errorf("path not located in GOPATH")
+
+// getImportPath returns the import path of the passed path, if relative the
+// path is resolved relative to the passed cwd.
+// Returns an error if the path is not the GOPATH.
+func getImportPath(ctx *build.Context, cwd, path string) (string, error) {
 	path, err := cwdAbs(cwd, path)
 	if err != nil {
 		return "", err
 	}
-	ps := filepath.SplitList(build.Default.GOROOT)
-	ps = append(ps, filepath.SplitList(build.Default.GOPATH)...)
+	ps := filepath.SplitList(ctx.GOPATH)
 	for _, p := range ps {
-		if imp, err := filepath.Rel(p, path); err == nil {
-			return imp, nil
+		prefix := filepath.Join(p, "src")
+		if strings.HasPrefix(path, prefix) {
+			imp := strings.TrimPrefix(path, prefix)
+			imp = strings.TrimPrefix(imp, string(filepath.Separator))
+			return filepath.ToSlash(imp), nil
 		}
+
 	}
-	return "", fmt.Errorf("%s path not located in GOROOT/GOPATH", path)
+	return "", ErrNotInGoPath
+}
+
+// goRootPkgPath returns the relative path to the directory containing standard
+// packages sources from the GOROOT. This changed starting in 1.4 :
+//
+//	In Go 1.4, the pkg level of the source tree is now gone, so for example
+//	the fmt package's source, once kept in directory src/pkg/fmt, now lives
+//	one level higher in src/fmt.
+//
+// Returns an error if it cannot import the `fmt` package or determine a
+// relative path.
+func goRootPkgPath() (string, error) {
+	pkg, err := build.Import("fmt", "", build.FindOnly)
+	if err != nil {
+		return "", fmt.Errorf("can't import standard package")
+	}
+	rel, err := filepath.Rel(build.Default.GOROOT, pkg.Dir)
+	if err != nil {
+		return "", fmt.Errorf("can't determine pkg path")
+	}
+	return filepath.Dir(rel), nil
 }

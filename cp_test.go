@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"go/build"
 	"io/ioutil"
 	"os"
@@ -126,25 +125,4 @@ func testPackagesEqual(t *testing.T, a, b *build.Package) {
 		t.Errorf("package test imports don't match, %s : %s\n",
 			a.TestImports, b.TestImports)
 	}
-}
-
-// goRootPkgPath returns the relative path to the directory containing standard
-// packages sources from the GOROOT. This changed starting in 1.4 :
-//
-//	In Go 1.4, the pkg level of the source tree is now gone, so for example
-//	the fmt package's source, once kept in directory src/pkg/fmt, now lives
-//	one level higher in src/fmt.
-//
-// Returns an error if it cannot import the `fmt` package or determine a
-// relative path.
-func goRootPkgPath() (string, error) {
-	pkg, err := build.Import("fmt", "", build.FindOnly)
-	if err != nil {
-		return "", fmt.Errorf("can't import standard package")
-	}
-	rel, err := filepath.Rel(build.Default.GOROOT, pkg.Dir)
-	if err != nil {
-		return "", fmt.Errorf("can't determine pkg path")
-	}
-	return filepath.Dir(rel), nil
 }

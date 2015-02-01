@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/build"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -99,7 +100,7 @@ var filterImportsTests = []struct {
 	},
 }
 
-// TestFilterImports testing the filterImports funtction using a table driven
+// TestFilterImports testing the filterImports function using a table driven
 // tests. Uses the listFilter function to generate the filter.
 func TestFilterImports(t *testing.T) {
 	for _, tt := range filterImportsTests {
@@ -108,6 +109,51 @@ func TestFilterImports(t *testing.T) {
 		out := filterImports(tt.imp, f)
 		if !reflect.DeepEqual(out, tt.out) {
 			t.Errorf(pre+"got %s, expected %s\n", out, tt.out)
+		}
+	}
+}
+
+// getImportPathTests holds table driven tests to test getImportPath.
+var getImportPathTests = []struct {
+	ctx       *build.Context
+	cwd, path string
+	// expected
+	imp string
+	err error
+}{
+	{
+		&build.Context{GOPATH: filepath.FromSlash("/gopath")},
+		filepath.FromSlash("/somewhere/else/"),
+		filepath.FromSlash("/gopath/src/github.com/example/vend"),
+		"github.com/example/vend",
+		nil,
+	},
+	{
+		&build.Context{GOPATH: filepath.FromSlash("/gopath")},
+		filepath.FromSlash("/gopath/src/github.com"),
+		filepath.FromSlash("example/vend"),
+		"github.com/example/vend",
+		nil,
+	},
+	{
+		&build.Context{GOPATH: filepath.FromSlash("/gopath")},
+		filepath.FromSlash("/nopath"),
+		filepath.FromSlash("example/vend"),
+		"",
+		ErrNotInGoPath,
+	},
+}
+
+// TestGetImportPath tests getImportPath, tries passing it an absolute and
+// relative path located in the GOPATH and one that is not in the GOPATH.
+func TestGetImportPath(t *testing.T) {
+	for _, tt := range getImportPathTests {
+		imp, err := getImportPath(tt.ctx, tt.cwd, tt.path)
+		if err != tt.err {
+			t.Errorf("got %v, expected %v", err, tt.err)
+		}
+		if imp != tt.imp {
+			t.Errorf("got %v, expected %v", imp, tt.imp)
 		}
 	}
 }
