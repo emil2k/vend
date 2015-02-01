@@ -58,13 +58,15 @@ func initc(ctx *build.Context, cwd, dst string, recurse bool) error {
 			cpDst := filepath.Join(dst, cpPkg.Name)
 			if hasString(dsts, cpDst) {
 				hasDups = true
+				if dstImpPath, err := getImportPath(ctx, cwd, cpDst); err != nil {
+					return err
+				} else {
+					updates = append(updates,
+						updateJob{pkg.Dir, cpPkg.ImportPath, dstImpPath, false})
+				}
+			} else {
 				cps = append(cps,
 					cpJob{pkg.Dir, cpPkg.ImportPath, cpDst, false})
-			} else if cpImportPath, err := getImportPath(ctx, cwd, cpDst); err != nil {
-				return err
-			} else {
-				updates = append(updates,
-					updateJob{pkg.Dir, cpPkg.ImportPath, cpImportPath, false})
 			}
 			dsts = append(dsts, cpDst)
 			dups[cpPkg.Name] = appendUnique(dups[cpPkg.Name], cpPkg.ImportPath)
