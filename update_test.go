@@ -1,61 +1,45 @@
 package main
 
 import (
-	"go/build"
-	"go/parser"
-	"go/token"
-	"io/ioutil"
 	"os"
-	"strconv"
+	"path/filepath"
 	"testing"
 )
 
-// TestRWDir copies a standard package then update its import paths and checks
-// to make sure that they were updated.
-// Removes the copied package when done with it.
-func TestRWDir(t *testing.T) {
-	dst, err := ioutil.TempDir(os.TempDir(), "testupdate")
+// TestUpdate test the update subcommand to make sure that it properly changes
+// imports, including imports of child packages.
+// Also this command tests the call without recursion into subdirectories,
+// checks to make sure they are not affected.
+func TestUpdate(t *testing.T) {
+	ctx := getTestContextCopy(t, "testdata/update")
+	defer os.RemoveAll(ctx.GOPATH)
+	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
+	err := update(ctx, pkgDir, "go", "mygo", false)
 	if err != nil {
-		t.Error(err.Error())
+		t.Errorf("update error : %s", err.Error())
 	}
-	defer os.RemoveAll(dst)
-	if srcPkg, err := getPackage(&build.Default, "", "encoding/json"); err != nil {
-		t.Errorf("error during src import : %s\n", err.Error())
-	} else if err := copyDir(srcPkg.Dir, dst); err != nil {
-		t.Errorf("error while copying standard package : %s\n",
-			err.Error())
-	} else if pkg, err := getPackage(&build.Default, "", dst); err != nil {
-		t.Errorf("error while importing copied package : %s\n",
-			err.Error())
-	} else if err := rwDir(pkg.Dir, map[string]string{
-		"unicode": "myuni",
-	}); err != nil {
-		t.Errorf("error during update : %s\n", err.Error())
-	} else {
-		// Parse the copied package and check that the import path was
-		// updated.
-		fs := token.NewFileSet()
-		mode := parser.AllErrors | parser.ParseComments
-		pkgs, err := parser.ParseDir(fs, pkg.Dir, nil, mode)
-		if err != nil {
-			t.Errorf("error while parsing copied package : %s\n",
-				err.Error())
-		}
-		newFound := false
-		for _, pkg := range pkgs {
-			for _, file := range pkg.Files {
-				for _, i := range file.Imports {
-					// Import path values are quoted
-					if i.Path.Value == strconv.Quote("unicode") {
-						t.Errorf("old import found : %s", i)
-					} else if i.Path.Value == strconv.Quote("myuni") {
-						newFound = true
-					}
-				}
-			}
-		}
-		if !newFound {
-			t.Errorf("new import not found")
-		}
+	testImports(t, pkgDir,
+		[]string{"fmt", "os", "mygo/ast", "mygo/build", "mygo/parser"})
+	// Now
+	childPkgDir := filepath.Join(pkgDir, "y")
+	testImports(t, childPkgDir,
+		[]string{"fmt", "os", "go/ast", "go/parser"})
+}
+
+// TestUpdateRecurse test the update subcommand with the recurse option. Makes
+// sure subdirectory package is also updated.
+func TestUpdateRecurse(t *testing.T) {
+	ctx := getTestContextCopy(t, "testdata/update")
+	defer os.RemoveAll(ctx.GOPATH)
+	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
+	err := update(ctx, pkgDir, "go", "mygo", true)
+	if err != nil {
+		t.Errorf("update error : %s", err.Error())
 	}
+	testImports(t, pkgDir,
+		[]string{"fmt", "os", "mygo/ast", "mygo/build", "mygo/parser"})
+	// Now
+	childPkgDir := filepath.Join(pkgDir, "y")
+	testImports(t, childPkgDir,
+		[]string{"fmt", "os", "mygo/ast", "mygo/parser"})
 }
