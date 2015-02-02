@@ -41,7 +41,6 @@ func initc(ctx *build.Context, cwd, dst string, recurse bool) error {
 	cps := make([]cpJob, 0)           // list of pending cp calls
 	updates := make([]updateJob, 0)   // list of pending update calls
 	dups := make(map[string][]string) // package name to import paths
-	hasDups := false
 	process := func(pkg *build.Package, err error) error {
 		imp := filterImports(getImports(pkg, true), f)
 		for _, i := range imp {
@@ -57,7 +56,6 @@ func initc(ctx *build.Context, cwd, dst string, recurse bool) error {
 			}
 			cpDst := filepath.Join(dst, cpPkg.Name)
 			if hasString(dsts, cpDst) {
-				hasDups = true
 				if dstImpPath, err := getImportPath(ctx, cwd, cpDst); err != nil {
 					return err
 				} else {
@@ -81,12 +79,13 @@ func initc(ctx *build.Context, cwd, dst string, recurse bool) error {
 		return err
 	}
 	// Report back if there is any packages with the same package name.
-	if hasDups {
-		return errDupe(dups)
+	for _, ps := range dups {
+		if len(ps) > 1 {
+			return errDupe(dups)
+		}
 	}
 	// Run copy command on each import.
 	for _, cj := range cps {
-		printBold(fmt.Sprintf("%s => %s", cj.src, cj.dst))
 		if err := cp(ctx, cj.cwd, cj.src, cj.dst, cj.recurse); err != nil {
 			return err
 		}
@@ -113,7 +112,7 @@ func (d errDupe) Error() string {
 				name, strings.Join(paths, ", ")))
 		}
 	}
-	return fmt.Sprintf("duplicate packages names found :\n%s",
+	return fmt.Sprintf("duplicate package names found :\n%s",
 		strings.Join(errs, "\n"))
 
 }

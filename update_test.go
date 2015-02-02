@@ -11,7 +11,7 @@ import (
 // Also this command tests the call without recursion into subdirectories,
 // checks to make sure they are not affected.
 func TestUpdate(t *testing.T) {
-	ctx := getTestContextCopy(t, "testdata/update")
+	ctx := getTestContextCopy(t, filepath.Join("testdata", "update"))
 	defer os.RemoveAll(ctx.GOPATH)
 	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
 	err := update(ctx, pkgDir, "go", "mygo", false)
@@ -30,7 +30,7 @@ func TestUpdate(t *testing.T) {
 // TestUpdateRecurse test the update subcommand with the recurse option. Makes
 // sure subdirectory package is also updated.
 func TestUpdateRecurse(t *testing.T) {
-	ctx := getTestContextCopy(t, "testdata/update")
+	ctx := getTestContextCopy(t, filepath.Join("testdata", "update"))
 	defer os.RemoveAll(ctx.GOPATH)
 	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
 	err := update(ctx, pkgDir, "go", "mygo", true)
