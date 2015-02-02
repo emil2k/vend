@@ -179,15 +179,14 @@ func goRootPkgPath() (string, error) {
 	return filepath.Dir(rel), nil
 }
 
-// changePathParent allows changing of a child import path to a new directory
+// changeImportPath allows changing of a child import path to a new directory
 // by specifiying the parent packages import path before `a` and after `b`.
-func changePathParent(a, b, child string) (string, error) {
-	a = filepath.FromSlash(a)
-	b = filepath.FromSlash(b)
-	child = filepath.FromSlash(child)
-	rel, err := filepath.Rel(a, child)
-	if err != nil {
-		return "", err
+func changeImportPath(a, b, child string) (string, error) {
+	if strings.HasPrefix(child, a) {
+		child = strings.TrimPrefix(child, a)
+		child = strings.TrimPrefix(child, "/")
+		return strings.TrimSuffix(b, "/") + "/" + child, nil
+	} else {
+		return "", fmt.Errorf("import path %s does not contain %s", a, child)
 	}
-	return filepath.ToSlash(filepath.Join(b, rel)), nil
 }

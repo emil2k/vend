@@ -158,22 +158,35 @@ func TestGetImportPath(t *testing.T) {
 	}
 }
 
-// changePathParentTests are table tests for the changePathParent function.
-var changePathParentTests = []struct {
-	a, b, child, out string
-	err              error
+// changeImportPathTests are table tests for the changeImportPath function.
+var changeImportPathTests = []struct {
+	// inputs
+	a, b, child string
+	// outputs
+	out string
+	err error
 }{
-	{"unicode", "encoding/json/lib/myuni", "unicode/utf8",
-		"encoding/json/lib/myuni/utf8", nil},
-	{"gopkg.in/yaml.v2/", "myyaml", "gopkg.in/yaml.v2/child",
-		"myyaml/child", nil},
+	{
+		"unicode",
+		"myuni",
+		"unicode/utf8",
+		"myuni/utf8",
+		nil,
+	},
+	{
+		"unicode/", // trailing slash test
+		"myuni/",
+		"unicode/utf8",
+		"myuni/utf8",
+		nil,
+	},
 }
 
-// TestChangePathParent tests the helper function changePathParent using a table
+// TestChangeImportPath tests the helper function changeImportPath using a table
 // driven test.
-func TestChangePathParent(t *testing.T) {
-	for _, tt := range changePathParentTests {
-		if x, err := changePathParent(tt.a, tt.b, tt.child); err != tt.err {
+func TestChangeImportPath(t *testing.T) {
+	for _, tt := range changeImportPathTests {
+		if x, err := changeImportPath(tt.a, tt.b, tt.child); err != tt.err {
 			t.Errorf("error : %s\n", err.Error())
 		} else if x != tt.out {
 			t.Errorf("expected %s, got %s\n", tt.out, x)

@@ -36,7 +36,7 @@ func update(ctx *build.Context, src, from, to string, recurse bool) error {
 			case from == a:
 				rw[from] = to
 			case isChildPackage(from, a):
-				cp, err := changePathParent(from, to, a)
+				cp, err := changeImportPath(from, to, a)
 				if err != nil {
 					return err
 				}
