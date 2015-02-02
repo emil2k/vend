@@ -103,19 +103,6 @@ func mv(ctx *build.Context, cwd, src, dst string, recurse bool) (err error) {
 	return os.RemoveAll(src)
 }
 
-// changePathParent allows changing of a child import path to a new directory
-// by specifiying a their parent packages import path before `a` and after `b`.
-func changePathParent(a, b, child string) (string, error) {
-	a = filepath.FromSlash(a)
-	b = filepath.FromSlash(b)
-	child = filepath.FromSlash(child)
-	rel, err := filepath.Rel(a, child)
-	if err != nil {
-		return "", err
-	}
-	return filepath.ToSlash(filepath.Join(b, rel)), nil
-}
-
 // copyFileJob holds a pending copyFile call.
 type copyFileJob struct {
 	si       os.FileInfo

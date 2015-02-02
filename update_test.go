@@ -19,11 +19,12 @@ func TestUpdate(t *testing.T) {
 		t.Errorf("update error : %s", err.Error())
 	}
 	testImports(t, pkgDir,
-		[]string{"fmt", "os", "mygo/ast", "mygo/build", "mygo/parser"})
-	// Now
+		[]string{"fmt", "os", "mygo/ast", "mygo/build", "mygo/parser"},
+		false)
+	// Test that child package was not updated.
 	childPkgDir := filepath.Join(pkgDir, "y")
 	testImports(t, childPkgDir,
-		[]string{"fmt", "os", "go/ast", "go/parser"})
+		[]string{"fmt", "os", "go/ast", "go/parser"}, false)
 }
 
 // TestUpdateRecurse test the update subcommand with the recurse option. Makes
@@ -37,9 +38,10 @@ func TestUpdateRecurse(t *testing.T) {
 		t.Errorf("update error : %s", err.Error())
 	}
 	testImports(t, pkgDir,
-		[]string{"fmt", "os", "mygo/ast", "mygo/build", "mygo/parser"})
-	// Now
+		[]string{"fmt", "os", "mygo/ast", "mygo/build", "mygo/parser"},
+		false)
+	// Test child package was updated as well.
 	childPkgDir := filepath.Join(pkgDir, "y")
 	testImports(t, childPkgDir,
-		[]string{"fmt", "os", "mygo/ast", "mygo/parser"})
+		[]string{"fmt", "os", "mygo/ast", "mygo/parser"}, false)
 }

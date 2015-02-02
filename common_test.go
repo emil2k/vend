@@ -9,18 +9,25 @@ import (
 	"testing"
 )
 
-// testImports tests that the package in the passed directory has the expected
-// imports.
-func testImports(t *testing.T, dir string, imports []string) {
+// testBuild tests that the package in the passed directory builds without
+// errors and returns the package.
+func testBuild(t *testing.T, dir string) *build.Package {
 	pkg, err := build.ImportDir(dir, 0)
 	if err != nil {
 		t.Errorf("error during build : %s", err.Error())
 	}
-	gotImports := pkg.Imports
-	sort.Strings(gotImports)
+	return pkg
+}
+
+// testImports tests that the package in the passed directory has the expected
+// imports. Includes imports from test files and external test files based on
+// `includeTests` bool.
+func testImports(t *testing.T, dir string, imports []string, includeTests bool) {
+	pkg := testBuild(t, dir)
+	gotImports := getImports(pkg, includeTests) // sorts it already
 	sort.Strings(imports)
 	if !reflect.DeepEqual(gotImports, imports) {
-		t.Errorf("imports not equal, got %v, expected %v", gotImports, imports)
+		t.Errorf("imports not equal : got %v, expected %v", gotImports, imports)
 	}
 }
 
