@@ -24,7 +24,9 @@ var ErrDstExists = errors.New("destination already exists")
 // inside the directory that imports itself.
 // Recurses into subdirectories to update the import path of the copied package
 // or any of its child packages based on the `recurse` parameter.
-func cp(ctx *build.Context, cwd, src, dst string, recurse bool) (err error) {
+// Includes hidden files (staring with a dot) when copying files based on the
+// `hidden` parameter.
+func cp(ctx *build.Context, cwd, src, dst string, recurse, hidden bool) (err error) {
 	// Check if destination folder exists and based on force flag determine
 	// action.
 	if _, serr := os.Stat(dst); serr == nil {
@@ -59,7 +61,7 @@ func cp(ctx *build.Context, cwd, src, dst string, recurse bool) (err error) {
 		return err
 	}
 	// Copy the package over.
-	if err = copyDir(src, dst); err != nil {
+	if err = copyDir(src, dst, hidden); err != nil {
 		return err
 	}
 	// Determine import path of the new package, and update import paths in
@@ -92,8 +94,8 @@ type copyFileJob struct {
 // mode.
 // With the opt.verbose option set outputs the src and destination of each
 // copied file.
-// Skips hidden files base on the opt.hidden option.
-func copyDir(src, dst string) error {
+// Skips hidden files base on the `hidden` parameter.
+func copyDir(src, dst string, hidden bool) error {
 	// First compile a list of copies to execute then execute, otherwise
 	// infinite copy situations could arise when copying a parent directory
 	// into a child directory.
@@ -102,17 +104,19 @@ func copyDir(src, dst string) error {
 		if err != nil {
 			return err
 		}
-		rel, err := filepath.Rel(src, path)
-		if err != nil {
-			return err
-		}
-		if rel != "." && rel != ".." &&
-			!opt.hidden && strings.HasPrefix(rel, ".") {
+		// Determine whether copying a hidden file and whether to skip
+		// it or not.
+		if base := filepath.Base(path); base != "." && base != ".." &&
+			!hidden && strings.HasPrefix(base, ".") {
 			if info.IsDir() {
 				return filepath.SkipDir
 			} else {
 				return nil
 			}
+		}
+		rel, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
 		}
 		fileDst := filepath.Join(dst, rel)
 		if opt.verbose {

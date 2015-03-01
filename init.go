@@ -16,7 +16,9 @@ import (
 // need to be copied with the cp command, before running init again.
 // Includes dependencies from packages located in subdirectories based on the
 // `recurse` parameter.
-func initc(ctx *build.Context, cwd, dst string, recurse bool) error {
+// Includes hidden files (staring with a dot) when copying files based on the
+// `hidden` parameter.
+func initc(ctx *build.Context, cwd, dst string, recurse, hidden bool) error {
 	dst, err := cwdAbs(cwd, dst)
 	if err != nil {
 		return err
@@ -64,7 +66,7 @@ func initc(ctx *build.Context, cwd, dst string, recurse bool) error {
 				}
 			} else {
 				cps = append(cps,
-					cpJob{pkg.Dir, cpPkg.ImportPath, cpDst, false})
+					cpJob{pkg.Dir, cpPkg.ImportPath, cpDst, false, hidden})
 			}
 			dsts = append(dsts, cpDst)
 			dups[cpPkg.Name] = appendUnique(dups[cpPkg.Name], cpPkg.ImportPath)
@@ -86,7 +88,7 @@ func initc(ctx *build.Context, cwd, dst string, recurse bool) error {
 	}
 	// Run copy command on each import.
 	for _, cj := range cps {
-		if err := cp(ctx, cj.cwd, cj.src, cj.dst, cj.recurse); err != nil {
+		if err := cp(ctx, cj.cwd, cj.src, cj.dst, cj.recurse, cj.hidden); err != nil {
 			return err
 		}
 	}
@@ -119,8 +121,8 @@ func (d errDupe) Error() string {
 
 // cpJob holds a pending call to cp.
 type cpJob struct {
-	cwd, src, dst string
-	recurse       bool
+	cwd, src, dst   string
+	recurse, hidden bool
 }
 
 // updateJob holds a pending call to update.

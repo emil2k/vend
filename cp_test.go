@@ -15,7 +15,7 @@ func TestCp(t *testing.T) {
 	defer os.RemoveAll(ctx.GOPATH)
 	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
 	err := cp(ctx, pkgDir, filepath.Join("other.com", "y"),
-		filepath.Join("lib", "y"), false)
+		filepath.Join("lib", "y"), false, false)
 	if err != nil {
 		t.Errorf("error during cp : %s", err.Error())
 	}
@@ -36,7 +36,7 @@ func TestCpRecursive(t *testing.T) {
 	defer os.RemoveAll(ctx.GOPATH)
 	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
 	err := cp(ctx, pkgDir, filepath.Join("other.com", "y"),
-		filepath.Join("lib", "y"), true)
+		filepath.Join("lib", "y"), true, false)
 	if err != nil {
 		t.Errorf("error during cp : %s", err.Error())
 	}
@@ -54,7 +54,7 @@ func TestCpInfinite(t *testing.T) {
 	defer os.RemoveAll(ctx.GOPATH)
 	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
 	cpPkgDir := filepath.Join(ctx.GOPATH, "src", "other.com", "y", "lib", "y")
-	err := cp(ctx, pkgDir, filepath.Join("other.com", "y"), cpPkgDir, false)
+	err := cp(ctx, pkgDir, filepath.Join("other.com", "y"), cpPkgDir, false, false)
 	if err != nil {
 		t.Errorf("error during cp : %s", err.Error())
 	}
@@ -62,4 +62,51 @@ func TestCpInfinite(t *testing.T) {
 	// Test that the import path updated in the external test package of the
 	// copied package.
 	testImports(t, cpPkgDir, []string{"other.com/y/lib/y"}, true)
+}
+
+// TestCpIncludeHiddeFiles tests cp with including hidden files.
+func TestCpIncludeHiddenFiles(t *testing.T) {
+	testHiddenFiles(t, true)
+}
+
+// TestCpIgnoreHiddeFiles tests cp with ignoring hidden files.
+func TestCpIgnoreHiddenFiles(t *testing.T) {
+	testHiddenFiles(t, false)
+}
+
+// testHidden constructs a test based on the parameter whether to keep hidden files
+// or not.
+func testHiddenFiles(t *testing.T, keepHidden bool) {
+	ctx := getTestContextCopy(t, filepath.Join("testdata", "cp"))
+	defer os.RemoveAll(ctx.GOPATH)
+	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
+	dstPkgDir := filepath.Join(pkgDir, "lib", "y")
+	err := cp(ctx, pkgDir, filepath.Join("other.com", "y"),
+		filepath.Join("lib", "y"), false, keepHidden)
+	if err != nil {
+		t.Errorf("error during cp : %s", err.Error())
+	}
+	mainHiddenPath := filepath.Join(dstPkgDir, ".hidden")
+	subHiddenPath := filepath.Join(dstPkgDir, "sub", ".hidden")
+	// Test hidden file presense matches expectations.
+	testExists(t, mainHiddenPath, keepHidden)
+	testExists(t, subHiddenPath, keepHidden)
+}
+
+// testExists whether a file exists or not at the given path, fails the test if
+// accessing the file results in an error.
+func testExists(t *testing.T, path string, exists bool) {
+	_, err := os.Stat(path)
+	switch {
+	case err == nil:
+		fallthrough
+	case os.IsExist(err):
+		if !exists {
+			t.Fatalf("file exists, when it shouldn't : %s : %v", path, err)
+		}
+	case os.IsNotExist(err):
+		if exists {
+			t.Fatalf("file does not exist, when it should : %s : %v", path, err)
+		}
+	}
 }

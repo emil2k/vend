@@ -13,7 +13,7 @@ func TestInit(t *testing.T) {
 	ctx := getTestContextCopy(t, filepath.Join("testdata", "init"))
 	defer os.RemoveAll(ctx.GOPATH)
 	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
-	err := initc(ctx, pkgDir, "lib", false)
+	err := initc(ctx, pkgDir, "lib", false, false)
 	if err != nil {
 		t.Errorf("error during init : %s", err.Error())
 		t.FailNow()
@@ -41,7 +41,7 @@ func TestInitRecursive(t *testing.T) {
 	ctx := getTestContextCopy(t, filepath.Join("testdata", "init"))
 	defer os.RemoveAll(ctx.GOPATH)
 	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
-	err := initc(ctx, pkgDir, "lib", true)
+	err := initc(ctx, pkgDir, "lib", true, false)
 	if err != nil {
 		t.Errorf("error during init : %s", err.Error())
 		t.FailNow()
@@ -69,7 +69,7 @@ func TestInitDupe(t *testing.T) {
 	ctx := getTestContextCopy(t, filepath.Join("testdata", "init"))
 	defer os.RemoveAll(ctx.GOPATH)
 	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "dupe")
-	err := initc(ctx, pkgDir, "lib", false)
+	err := initc(ctx, pkgDir, "lib", false, false)
 	dupe, ok := err.(errDupe)
 	if err == nil || !ok {
 		t.Errorf("should return a duplicate package name error")

@@ -36,7 +36,7 @@ func testImports(t *testing.T, dir string, imports []string, includeTests bool) 
 // In case of error immediately failst the test.
 func getTestContextCopy(t *testing.T, src string) *build.Context {
 	ctx := getTestContext(t)
-	if err := copyDir(src, ctx.GOPATH); err != nil {
+	if err := copyDir(src, ctx.GOPATH, true); err != nil {
 		t.Errorf("error while copying GOPATH : %s", err.Error())
 		t.FailNow()
 	}

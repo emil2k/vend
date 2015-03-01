@@ -12,7 +12,7 @@ func TestMv(t *testing.T) {
 	defer os.RemoveAll(ctx.GOPATH)
 	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
 	srcDir := filepath.Join(ctx.GOPATH, "src", "other.com", "y")
-	err := mv(ctx, pkgDir, "other.com/y", "lib/y", false)
+	err := mv(ctx, pkgDir, "other.com/y", "lib/y", false, false)
 	if err != nil {
 		t.Errorf("error during mv : %s", err.Error())
 	}
@@ -29,7 +29,7 @@ func TestMvStandardPackage(t *testing.T) {
 	ctx := getTestContextCopy(t, filepath.Join("testdata", "cp"))
 	defer os.RemoveAll(ctx.GOPATH)
 	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
-	err := mv(ctx, pkgDir, "fmt", "lib/fmt", false)
+	err := mv(ctx, pkgDir, "fmt", "lib/fmt", false, false)
 	if err != ErrStandardPackage {
 		t.Errorf("moving standard package err : got %v, expected %v",
 			err, ErrStandardPackage)
