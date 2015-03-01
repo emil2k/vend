@@ -12,8 +12,14 @@ import (
 // directory.
 func list(ctx *build.Context, cwd, path string) error {
 	imps := make([]string, 0)
+	var parentPkg *build.Package
 	process := func(pkg *build.Package, err error) error {
-		f := listFilter(ctx, cwd, pkg.ImportPath, opt.child, opt.standard)
+		// Set the parent package so child filters work properly as the
+		// command recurses.
+		if parentPkg == nil {
+			parentPkg = pkg
+		}
+		f := listFilter(ctx, cwd, parentPkg.ImportPath, opt.child, opt.standard)
 		for _, add := range filterImports(getImports(pkg, opt.tests), f) {
 			imps = appendUnique(imps, add)
 		}
