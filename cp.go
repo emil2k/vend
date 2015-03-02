@@ -4,7 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"go/build"
+	"go/scanner"
+	"go/token"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -62,6 +65,10 @@ func cp(ctx *build.Context, cwd, src, dst string, recurse, hidden bool) (err err
 	}
 	// Copy the package over.
 	if err = copyDir(src, dst, hidden); err != nil {
+		return err
+	}
+	// Strip the canonical import path from files.
+	if err = stripCanonicalImportPathDir(dst); err != nil {
 		return err
 	}
 	// Determine import path of the new package, and update import paths in
@@ -177,4 +184,95 @@ func copyFile(si os.FileInfo, src, dst string) (err error) {
 	default:
 		return ErrIrregularFile
 	}
+}
+
+// stripCanonicalImportPathDir strips the canonical import path from all files
+// in the directory.
+func stripCanonicalImportPathDir(dir string) error {
+	walk := func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.Mode().IsRegular() ||
+			!strings.HasSuffix(filepath.Base(path), ".go") {
+			return nil
+		}
+		return stripCanonicalImportPathFile(path)
+	}
+	return filepath.Walk(dir, walk)
+}
+
+// stripCanonicalImportPathFile strips the canonical import path from the file
+// at the path.
+func stripCanonicalImportPathFile(path string) error {
+	src, err := getFileContents(path)
+	if err != nil {
+		return err
+	}
+	contains, start, end := containsCanonicalImportPath(src)
+	if !contains {
+		return nil // nothing to do
+	}
+	// Strip the path and write to the file.
+	strip := append(src[:start], src[end:]...)
+	return ioutil.WriteFile(path, strip, 0)
+}
+
+// containsCanonicalImportPath check whether the src contains a canonical
+// import path, and if so returns the file offsets for where the package
+// declaration ends to where the comment ends.
+// Offset start at 0.
+func containsCanonicalImportPath(src []byte) (contains bool, start, end int) {
+	fs := token.NewFileSet()
+	tf := fs.AddFile("", fs.Base(), len(src))
+	var s scanner.Scanner
+	s.Init(tf, src, nil, scanner.ScanComments)
+	currentLine := 0
+	type scanned struct {
+		pos token.Position
+		tok token.Token
+		lit string
+	}
+	var line []scanned // current line buffer
+	for {
+		pos, tok, lit := s.Scan()
+		posd := fs.Position(pos)
+		if tok == token.EOF || posd.Line != currentLine {
+			// Does it match the signature of the canonical import
+			// path comment, which will be preceded by a PACKAGE,
+			// IDENT, and SEMICOLON.
+			if len(line) == 4 &&
+				line[0].tok == token.PACKAGE &&
+				line[1].tok == token.IDENT &&
+				line[2].tok == token.SEMICOLON &&
+				line[3].tok == token.COMMENT {
+				return true,
+					line[1].pos.Offset + len(line[1].lit),
+					line[3].pos.Offset + len(line[3].lit)
+			}
+			// Reset the current line.
+			line = make([]scanned, 0, 0)
+			currentLine = posd.Line
+		}
+		line = append(line, scanned{posd, tok, lit})
+		if tok == token.EOF {
+			break
+		}
+	}
+	return false, 0, 0
+}
+
+// getFileContens opens the file at the provided path, reads all the content,
+// and returns it.
+func getFileContents(path string) ([]byte, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	content, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+	return content, nil
 }

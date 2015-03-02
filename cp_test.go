@@ -17,7 +17,7 @@ func TestCp(t *testing.T) {
 	err := cp(ctx, pkgDir, filepath.Join("other.com", "y"),
 		filepath.Join("lib", "y"), false, false)
 	if err != nil {
-		t.Errorf("error during cp : %s", err.Error())
+		t.Fatalf("error during cp : %s", err.Error())
 	}
 	testImports(t, pkgDir, []string{"example.com/x/lib/y"}, false)
 	// Test that the import path updated in the external test package of the
@@ -64,6 +64,49 @@ func TestCpInfinite(t *testing.T) {
 	testImports(t, cpPkgDir, []string{"other.com/y/lib/y"}, true)
 }
 
+// TestCpStripCanonicalImportPaths tests that the cannonical import paths are
+// stripped from copied packages when running the cp command, otherwise Go will
+// not let it build in its new location.
+// Checks that the import path is stripped both in the main copied package and
+// in a copied child package.
+func TestCpStripCanonicalImportPaths(t *testing.T) {
+	ctx := getTestContextCopy(t, filepath.Join("testdata", "cp"))
+	//defer os.RemoveAll(ctx.GOPATH)
+	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
+	dstDir := filepath.Join(pkgDir, "lib", "y")
+	err := cp(ctx, pkgDir, filepath.Join("other.com", "y"),
+		dstDir, false, false)
+	if err != nil {
+		t.Fatalf("error during cp : %s", err.Error())
+	}
+	// Test to see if there are any cannonical import paths in either the
+	// main copied package or its copied child package.
+	testStrippedCanonicalImportPath(t, filepath.Join(dstDir, "y.go"))
+	testStrippedCanonicalImportPath(t, filepath.Join(dstDir, "sub", "sub.go"))
+	// Test that the packages build without error after stripping.
+	if _, err := ctx.ImportDir(dstDir, 0); err != nil {
+		t.Errorf("main copied package did not build : %v", err)
+	}
+	if _, err := ctx.ImportDir(filepath.Join(dstDir, "sub"), 0); err != nil {
+		t.Errorf("sub copied package did not build : %v", err)
+	}
+}
+
+// testStrippedCannonicalImportPath tests whether the file contains a canonical
+// import path or not.
+func testStrippedCanonicalImportPath(t *testing.T, path string) {
+	src, err := getFileContents(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	contains, start, end := containsCanonicalImportPath(src)
+	if contains {
+		lit := string(src[start:end])
+		t.Errorf("canonical import path found on line number in file %s : %s",
+			path, lit)
+	}
+}
+
 // TestCpIncludeHiddeFiles tests cp with including hidden files.
 func TestCpIncludeHiddenFiles(t *testing.T) {
 	testHiddenFiles(t, true)
@@ -74,8 +117,8 @@ func TestCpIgnoreHiddenFiles(t *testing.T) {
 	testHiddenFiles(t, false)
 }
 
-// testHidden constructs a test based on the parameter whether to keep hidden files
-// or not.
+// testHidden constructs a test based on the parameter whether to keep hidden
+// files or not.
 func testHiddenFiles(t *testing.T, keepHidden bool) {
 	ctx := getTestContextCopy(t, filepath.Join("testdata", "cp"))
 	defer os.RemoveAll(ctx.GOPATH)
