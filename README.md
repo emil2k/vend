@@ -4,7 +4,7 @@ branch](https://img.shields.io/travis/emil2k/vend.svg?style=flat)](https://travi
 [![Coverage
 Status](https://img.shields.io/coveralls/emil2k/vend.svg?style=flat)](https://coveralls.io/r/emil2k/vend)
 
-A Swiss Army knife for vending your own Go packages.
+A Swiss Army knife for vendoring your own Go packages.
 
 ## Installation
 
