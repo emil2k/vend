@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-Copyright (c) 2014 Tapeja
+Copyright (c) 2014 Emil Davtyan
 
 ---
 
