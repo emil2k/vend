@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// TestUpdate test the update subcommand to make sure that it properly changes
+// TestPath test the path subcommand to make sure that it properly changes
 // imports, including imports of child packages.
 // Also this command tests the call without recursion into subdirectories,
 // checks to make sure they are not affected.
@@ -14,7 +14,7 @@ func TestUpdate(t *testing.T) {
 	ctx := getTestContextCopy(t, filepath.Join("testdata", "update"))
 	defer os.RemoveAll(ctx.GOPATH)
 	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
-	err := update(ctx, pkgDir, "go", "mygo", false)
+	err := path(ctx, pkgDir, "go", "mygo", false)
 	if err != nil {
 		t.Errorf("update error : %s", err.Error())
 	}
@@ -27,13 +27,13 @@ func TestUpdate(t *testing.T) {
 		[]string{"fmt", "os", "go/ast", "go/parser"}, false)
 }
 
-// TestUpdateRecurse test the update subcommand with the recurse option. Makes
-// sure subdirectory package is also updated.
-func TestUpdateRecurse(t *testing.T) {
+// TestPathRecurse test the path subcommand with the recurse option. Makes sure
+// subdirectory package is also updated.
+func TestPathRecurse(t *testing.T) {
 	ctx := getTestContextCopy(t, filepath.Join("testdata", "update"))
 	defer os.RemoveAll(ctx.GOPATH)
 	pkgDir := filepath.Join(ctx.GOPATH, "src", "example.com", "x")
-	err := update(ctx, pkgDir, "go", "mygo", true)
+	err := path(ctx, pkgDir, "go", "mygo", true)
 	if err != nil {
 		t.Errorf("update error : %s", err.Error())
 	}

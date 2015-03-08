@@ -13,25 +13,25 @@ import (
 	"github.com/emil2k/vend/lib/astutil"
 )
 
-// update subcommand updates the import paths in the `src` directory that
+// path subcommand updates the import paths in the `cwd` directory that
 // contain the `from` import or an import located in its subdirectory to the
 // equivalent import in the `to` path.
 // Recurses into subdirectories to update import paths based on the `recurse`
 // parameter.
-func update(ctx *build.Context, src, from, to string, recurse bool) error {
-	process := func(srcPkg *build.Package, _ error) error {
-		// Get a list of all imports for the package in the src
+func path(ctx *build.Context, cwd, from, to string, recurse bool) error {
+	process := func(cwdPkg *build.Package, _ error) error {
+		// Get a list of all imports for the package in the cwd
 		// directory, to determine which child package also need to be
 		// updated.
-		srcImp, srcDir := srcPkg.ImportPath, srcPkg.Dir
-		if len(srcImp) == 0 || len(srcDir) == 0 {
-			return fmt.Errorf("no import path or directory for src package")
+		cwdImp, cwdDir := cwdPkg.ImportPath, cwdPkg.Dir
+		if len(cwdImp) == 0 || len(cwdDir) == 0 {
+			return fmt.Errorf("no import path or directory for cwd package")
 		}
 		// Compile map of import paths to change.
 		rw := make(map[string]string)
-		// Get the children of the src package their import paths will
+		// Get the children of the cwd package their import paths will
 		// be updated as well.
-		for _, a := range getImports(srcPkg, true) {
+		for _, a := range getImports(cwdPkg, true) {
 			switch {
 			case from == a:
 				rw[from] = to
@@ -44,16 +44,16 @@ func update(ctx *build.Context, src, from, to string, recurse bool) error {
 			}
 		}
 		if len(rw) > 0 {
-			return rwDir(srcDir, rw)
+			return rwDir(cwdDir, rw)
 		}
 		return nil
 	}
 	if recurse {
 		// Recurse into subdirectory packages.
-		if err := recursePackages(ctx, src, process); err != nil {
+		if err := recursePackages(ctx, cwd, process); err != nil {
 			return err
 		}
-	} else if err := process(getPackage(ctx, src, src)); err != nil {
+	} else if err := process(getPackage(ctx, cwd, cwd)); err != nil {
 		return err
 	}
 	return nil

@@ -11,6 +11,7 @@ Valid subcommands :
   vend init
   vend cp
   vend mv
+  vend path
   vend list
   vend info
 
@@ -72,4 +73,14 @@ directory. The mv subcommand cannot be used with standard packages, use
 cp instead.
 
   vend mv [from] [to]
+`
+
+// pathUsage describes usage of the path subcommand.
+const pathUsage string = `
+Updates all the usages of the import path [from] to the import path [to] for
+the package in the current working directory. When updating it includes import
+paths located in subdirectories of the [from] import path, updating them to
+their corresponding location in the [to] import path.
+
+  vend path [from] [to]
 `

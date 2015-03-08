@@ -94,7 +94,7 @@ func initc(ctx *build.Context, cwd, dst string, recurse, hidden bool) error {
 	}
 	// Run update commands on other packages that need updating.
 	for _, uj := range updates {
-		if err := update(ctx, uj.src, uj.from, uj.to, uj.recurse); err != nil {
+		if err := path(ctx, uj.src, uj.from, uj.to, uj.recurse); err != nil {
 			return err
 		}
 	}

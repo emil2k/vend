@@ -82,12 +82,12 @@ func cp(ctx *build.Context, cwd, src, dst string, recurse, hidden bool) (err err
 	// Update import paths in the copied package itself, as it may contain
 	// an external _test package that imports itself or may contain packages
 	// in its subdirectories that import it, must recurse.
-	if err := update(ctx, dst, srcImp, dstImp, true); err != nil {
+	if err := path(ctx, dst, srcImp, dstImp, true); err != nil {
 		return err
 	}
 	// Update the import paths, if the recurse flag is set recurse through
 	// the subdirectories and update import paths.
-	return update(ctx, cwd, srcImp, dstImp, recurse)
+	return path(ctx, cwd, srcImp, dstImp, recurse)
 }
 
 // copyFileJob holds a pending copyFile call.

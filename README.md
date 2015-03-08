@@ -99,6 +99,26 @@ Example :
 vend mv ./lib/pq ./lib/postgresql
 ```
 
+### `vend path`
+
+Updates all the usages of the import path `[from]` to the import path `[to]` for
+the package in the current working directory. When updating it includes import
+paths located in subdirectories of the `[from]` import path, updating them to
+their corresponding location in the `[to]` import path.
+
+```
+vend path [from] [to]
+
+-r=false: recurse into subdirectories to update their import paths
+-v=false: detailed output
+```
+
+Example :
+
+```
+vend path github.com/example/lib/pq github.com/lib/pq
+```
+
 ### `vend list`
 
 Lists all the dependencies of the package specified by the `[path]`, if ommitted

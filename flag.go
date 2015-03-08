@@ -100,4 +100,11 @@ func init() {
 	mv.BoolVar(&opt.hidden, "i", false,
 		"include hidden files, files starting with a dot")
 	flagMap["mv"] = mv
+	// Path flagset
+	path := flag.NewFlagSet("path", flag.ExitOnError)
+	path.Usage = usage(path, pathUsage)
+	path.BoolVar(&opt.verbose, "v", false, "detailed output")
+	path.BoolVar(&opt.recurse, "r", false,
+		"recurse into subdirectories to update their import paths")
+	flagMap["path"] = path
 }
